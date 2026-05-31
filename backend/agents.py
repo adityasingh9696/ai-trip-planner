@@ -11,8 +11,34 @@ import datetime
 # Load env vars
 load_dotenv()
 
-# We will use Gemini 1.5 Flash as our LLM for all agents
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
+# We will use Gemini 2.0 Flash as our LLM for all agents
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
+
+# Mapping of common destinations to their 3-letter IATA airport codes for fast local lookup
+IATA_MAP = {
+    "goa": "GOI",
+    "mumbai": "BOM",
+    "delhi": "DEL",
+    "new delhi": "DEL",
+    "jaipur": "JAI",
+    "lucknow": "LKO",
+    "bangalore": "BLR",
+    "bengaluru": "BLR",
+    "pune": "PNQ",
+    "hyderabad": "HYD",
+    "chennai": "MAA",
+    "kolkata": "CCU",
+    "agra": "AGR",
+    "london": "LHR",
+    "paris": "CDG",
+    "new york": "JFK",
+    "nyc": "JFK",
+    "dubai": "DXB",
+    "singapore": "SIN",
+    "tokyo": "HND",
+    "bangkok": "BKK",
+    "india": "DEL"
+}
 
 # Define the State our graph will pass around
 class TripState(TypedDict):
@@ -43,13 +69,17 @@ def weather_agent(state: TripState):
 def flight_agent(state: TripState):
     from tools import get_flight_prices
     
-    # Resolve IATA codes using LLM
+    # Resolve IATA codes locally using mapping to avoid hitting Gemini rate limits
     try:
         origin_code = "DEL" # Default origin
-        prompt = f"What is the 3-letter IATA airport code for {state['destination']}? Reply with ONLY the 3 uppercase letters and nothing else."
-        dest_code = llm.invoke(prompt).content.strip().upper()
-        if len(dest_code) != 3:
-            dest_code = "JFK" # Fallback
+        dest_clean = state['destination'].strip().lower()
+        
+        # Fast local lookup
+        dest_code = IATA_MAP.get(dest_clean)
+        
+        # Fallback logic if not in map
+        if not dest_code:
+            dest_code = "BOM" if "india" in dest_clean else "DEL"
             
         flight_date = (datetime.date.today() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
         flights = get_flight_prices.invoke({"origin": origin_code, "destination": dest_code, "date": flight_date})
