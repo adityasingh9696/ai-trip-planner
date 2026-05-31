@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     // Forward the request to the new Python FastAPI Orchestrator
-    const fastApiUrl = "http://127.0.0.1:8000/api/generate-trip";
+    const fastApiUrl = `${process.env.BACKEND_API_URL || "http://127.0.0.1:8000"}/api/generate-trip`;
     
     const response = await fetch(fastApiUrl, {
       method: "POST",

@@ -11,8 +11,8 @@ import datetime
 # Load env vars
 load_dotenv()
 
-# We will use Gemini 2.0 Flash as our LLM for all agents
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
+# We will use Gemini 2.5 Flash as our LLM for all agents
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
 
 # Mapping of common destinations to their 3-letter IATA airport codes for fast local lookup
 IATA_MAP = {
