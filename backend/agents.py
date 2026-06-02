@@ -11,6 +11,22 @@ import datetime
 # Load env vars
 load_dotenv()
 
+# Clean any contaminated env variables from copy-paste newlines/carriage returns
+for key in ["GEMINI_API_KEY", "GOOGLE_API_KEY", "SERPAPI_API_KEY", "OPENWEATHERMAP_API_KEY"]:
+    val = os.environ.get(key)
+    if val:
+        # Strip whitespaces, newlines, and carriage returns
+        val_clean = val.strip().replace('\r', '').replace('\n', '')
+        
+        # If the value contains subsequent variable names due to bulk copy-paste, split it
+        for var_name in ["SERPAPI_API_KEY", "OPENWEATHERMAP_API_KEY", "GEMINI_API_KEY", "PORT"]:
+            if var_name in val_clean and key != var_name:
+                val_clean = val_clean.split(var_name)[0].strip()
+                
+        # Strip any trailing characters or equal signs if they slipped in
+        val_clean = val_clean.rstrip('=').strip()
+        os.environ[key] = val_clean
+
 # We will use Gemini 2.5 Flash as our LLM for all agents
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
 
