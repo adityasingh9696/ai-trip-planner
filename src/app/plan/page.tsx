@@ -46,13 +46,13 @@ export default function PlanPage() {
 
   // Form State
   const [formData, setFormData] = useState({
-    destination: "Goa",
-    source: "Lucknow",
+    destination: "",
+    source: "",
     check_in: new Date().toISOString().split("T")[0],
     check_out: new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0],
-    budget: "Moderate",
+    budget: "Moderate (₹25,000 - ₹50,000)",
     companions: "Couple",
-    interests: "Beaches, Local Seafood, Sunset Cruises, Historical Forts",
+    interests: "",
   });
 
   // Autocomplete suggestions states
@@ -196,12 +196,13 @@ export default function PlanPage() {
   };
 
   const handleFlightBooking = (flight: any) => {
-    const fromCode = getAirportCode(formData.source).toUpperCase();
-    const toCode = getAirportCode(formData.destination || itinerary?.tripDetails?.destination).toUpperCase();
+    const sourceCity = formData.source.trim();
+    const destCity = formData.destination || itinerary?.tripDetails?.destination || "";
     const date = formData.check_in; // Format: YYYY-MM-DD
     
-    // Google Flights search URL - pre-filled with parameter queries
-    const redirectUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${toCode}%20from%20${fromCode}%20on%20${date}`;
+    // Google Flights search URL - pre-filled with natural language query so Google parses cities perfectly
+    const queryStr = encodeURIComponent(`Flights to ${destCity} from ${sourceCity} on ${date}`);
+    const redirectUrl = `https://www.google.com/travel/flights?q=${queryStr}`;
     window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
