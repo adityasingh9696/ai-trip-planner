@@ -34,8 +34,7 @@ export default function PlanPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${backendUrl}/api/generate-trip`, {
+      const res = await fetch("/api/generate-itinerary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
