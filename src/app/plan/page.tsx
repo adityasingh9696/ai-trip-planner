@@ -50,8 +50,8 @@ export default function PlanPage() {
     source: "",
     check_in: "",
     check_out: "",
-    budget: "Moderate (₹25,000 - ₹50,000)",
-    companions: "Couple",
+    budget: "",
+    companions: "",
     interests: "",
   });
 
@@ -620,7 +620,8 @@ export default function PlanPage() {
 
             <div className={styles.formGroup}>
               <label>Budget Limit</label>
-              <select className={styles.select} value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}>
+              <select required className={styles.select} value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}>
+                <option value="">Select Budget Limit...</option>
                 <option value="Under ₹25,000">Budget / Backpacker (Under ₹25k)</option>
                 <option value="Moderate (₹25,000 - ₹50,000)">Moderate / Standard (₹25k - ₹50k)</option>
                 <option value="Premium / Luxury (Above ₹50,000)">Luxury / Premium (Above ₹50k)</option>
@@ -629,7 +630,8 @@ export default function PlanPage() {
 
             <div className={styles.formGroup}>
               <label>Companions</label>
-              <select className={styles.select} value={formData.companions} onChange={e => setFormData({...formData, companions: e.target.value})}>
+              <select required className={styles.select} value={formData.companions} onChange={e => setFormData({...formData, companions: e.target.value})}>
+                <option value="">Select Companions...</option>
                 <option value="Solo">Solo Explorer</option>
                 <option value="Couple">Couple Getaway</option>
                 <option value="Family with kids">Family Trip (with kids)</option>
