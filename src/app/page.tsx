@@ -15,7 +15,7 @@ export default async function Home() {
   const destinations = [
     {
       name: "Tokyo, Japan",
-      image: "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=600&q=80",
+      image: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
       description: "Neon-lit streets, historic temples, and premium culinary journeys.",
       tag: "Cultural Fusion"
     },
