@@ -1,138 +1,903 @@
+/* Container & Parallax Space */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #151829 0%, #0b0d19 100%);
+  color: #f1f3f9;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  position: relative;
+  overflow: hidden;
   padding: 2rem;
+}
+
+/* Background animated glow orbs */
+.bgOrb1 {
+  position: absolute;
+  top: -10%;
+  left: 20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(0,0,0,0) 70%);
+  filter: blur(80px);
+  animation: floatOrb1 25s infinite alternate ease-in-out;
+  pointer-events: none;
+  z-index: 0;
+}
+.bgOrb2 {
+  position: absolute;
+  bottom: 10%;
+  right: 15%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.12) 0%, rgba(0,0,0,0) 70%);
+  filter: blur(90px);
+  animation: floatOrb2 30s infinite alternate ease-in-out;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes floatOrb1 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(80px, -50px) scale(1.1); }
+  100% { transform: translate(-40px, 60px) scale(0.95); }
+}
+@keyframes floatOrb2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-60px, 40px) scale(1.05); }
+  100% { transform: translate(50px, -80px) scale(0.9); }
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a78bfa;
+  font-weight: 600;
+  transition: color 0.2s ease;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 10;
+}
+.backLink:hover {
+  color: #c084fc;
 }
 
 .header {
   text-align: center;
   margin-bottom: 3rem;
+  position: relative;
+  z-index: 10;
 }
-
 .header h1 {
-  font-size: 2.5rem;
-  color: var(--color-primary);
-  margin-bottom: 0.5rem;
+  font-size: 3rem;
+  background: linear-gradient(135deg, #f3e8ff 10%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
-
 .header p {
-  color: var(--color-text-muted);
-  font-size: 1.1rem;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 300;
 }
 
+/* Workspace layout grid */
 .layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 10;
 }
-
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .layout {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 420px 1fr;
   }
 }
 
+/* Glassmorphism panel styling */
 .formCard {
-  background: white;
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 2.5rem 2rem;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  height: fit-content;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.formCard:hover {
+  border-color: rgba(167, 139, 250, 0.2);
 }
 
 .formGroup {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
 }
-
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
 .formGroup label {
   display: block;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--color-text);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+  color: #cbd5e1;
 }
 
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
 .input, .select {
   width: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
   font-size: 1rem;
+  color: #fff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
-  transition: border-color var(--transition-fast);
 }
-
 .input:focus, .select:focus {
   outline: none;
-  border-color: var(--color-primary);
+  border-color: #8b5cf6;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+.select option {
+  background: #0f172a;
+  color: #fff;
+}
+
+/* Dictation pulse microphone button */
+.voiceBtn {
+  position: absolute;
+  right: 10px;
+  color: #94a3b8;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.voiceBtn:hover {
+  color: #8b5cf6;
+  background: rgba(255, 255, 255, 0.05);
+}
+.voiceBtnListening {
+  color: #ef4444 !important;
+  animation: micPulse 1.5s infinite ease-in-out;
+}
+@keyframes micPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 .submitBtn {
   width: 100%;
-  padding: 14px;
-  background-color: var(--color-primary);
+  padding: 16px;
+  background: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%);
   color: white;
-  border: none;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
 }
-
 .submitBtn:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.45);
 }
-
 .submitBtn:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* Result Workspace cards styling */
 .resultCard {
-  background: white;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Destination Hero Parallax */
+.heroBanner {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11, 13, 25, 0.95) 0%, rgba(11, 13, 25, 0.3) 60%, rgba(0, 0, 0, 0) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
+  z-index: 2;
+}
+.heroOverlay h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0.25rem;
+}
+.heroOverlay p {
+  font-size: 1.1rem;
+  color: #cbd5e1;
+  font-weight: 400;
 }
 
-.dayContainer {
-  margin-top: 2rem;
+/* Floating weather tag */
+.weatherBadge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 3;
 }
 
-.dayTitle {
-  font-size: 1.25rem;
-  color: var(--color-secondary);
-  border-bottom: 2px solid var(--color-border);
+/* Action toolbars */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.toolBtn {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.toolBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #8b5cf6;
+  color: #fff;
+}
+
+/* Dynamic workspace tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
+}
+.tab {
+  padding: 12px 20px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.tab:hover {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.03);
+}
+.activeTab {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.08);
+}
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #8b5cf6;
+  border-radius: 2px;
 }
 
-.activity {
-  background: var(--color-background);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1rem;
+/* Flight comparative Boarding-Pass styling */
+.flightGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.boardingPass {
+  display: flex;
+  background: radial-gradient(circle at 0% 50%, rgba(255,255,255,0) 12px, rgba(255,255,255,0.02) 13px),
+              radial-gradient(circle at 100% 50%, rgba(255,255,255,0) 12px, rgba(255,255,255,0.02) 13px);
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.boardingPass:hover {
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15);
+}
+.flightMain {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 1.5rem;
+  border-right: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.flightStub {
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-left: 1.5rem;
+}
+.stubPrice {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #10b981;
+}
+.stubBtn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: #8b5cf6;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
 }
 
+.airportCode {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.airportTime {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  margin-top: 4px;
+}
+.flightRoute {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1.5rem;
+  position: relative;
+}
+.flightDuration {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+.flightPathLine {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+.flightPathLine::after {
+  content: '✈️';
+  position: absolute;
+  top: -10px;
+  left: 45%;
+  font-size: 12px;
+}
+
+/* Luxury Hotel cards styling */
+.hotelGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 640px) {
+  .hotelGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.hotelCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+.hotelCard:hover {
+  transform: translateY(-4px);
+  border-color: #8b5cf6;
+  box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2);
+}
+.hotelCover {
+  width: 100%;
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.hotelPriceBadge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: #10b981;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.hotelInfo {
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.hotelInfo h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.hotelAddress {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+.hotelMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.75rem;
+  font-size: 0.85rem;
+}
+.hotelRating {
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+}
+
+/* Timeline daily itinerary */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  border-left: 2px solid rgba(139, 92, 246, 0.2);
+}
+.timelineDay {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+.timelineBullet {
+  position: absolute;
+  left: -2.65rem;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  background: #8b5cf6;
+  border: 4px solid #0b0d19;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+}
+.timelineTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dayTheme {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 4px 10px;
+  border-radius: 30px;
+}
+.activityCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.25s ease;
+}
+.activityCard:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(167, 139, 250, 0.25);
+  transform: translateX(4px);
+}
 .activityHeader {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  font-weight: 600;
+  font-weight: 700;
 }
-
 .activityTime {
-  color: var(--color-primary);
+  color: #a78bfa;
 }
-
 .activityDesc {
-  color: var(--color-text-muted);
+  color: #94a3b8;
   font-size: 0.95rem;
-  margin-bottom: 0.5rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+.activityFooter {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.costBadge {
+  color: #10b981;
 }
 
-.activityCost {
+/* Speech-to-Text dynamic talking indicators */
+.speakerBtn {
+  padding: 6px;
+  color: #94a3b8;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.speakerBtn:hover {
+  color: #8b5cf6;
+  background: rgba(255, 255, 255, 0.05);
+}
+.speakerBtnPlaying {
+  color: #10b981 !important;
+  animation: speakWave 1s infinite alternate ease-in-out;
+}
+@keyframes speakWave {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+/* Recalculator Sliding Chat Drawer */
+.chatDrawer {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -20px 0 50px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chatDrawerOpen {
+  right: 0;
+}
+.chatHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chatHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.chatClose {
+  color: #94a3b8;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.chatClose:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+.chatBody {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.chatBubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.userBubble {
+  align-self: flex-end;
+  background: #7c3aed;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.agentBubble {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+.chatFooter {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+.chatInputWrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.chatInput {
+  width: 100%;
+  padding: 12px 45px 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.95rem;
+}
+.chatInput:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}
+.chatMic {
+  position: absolute;
+  right: 12px;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.chatMic:hover {
+  color: #8b5cf6;
+}
+.chatMicListening {
+  color: #ef4444 !important;
+  animation: micPulse 1.5s infinite ease-in-out;
+}
+.chatSend {
+  padding: 12px;
+  background: #8b5cf6;
+  color: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+.chatSend:hover {
+  background: #7c3aed;
+}
+
+/* History Sidebar / Saved Trips Dashboard */
+.historyPanel {
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 300px;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.historyPanelOpen {
+  left: 0;
+}
+.historyHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.historyHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.historyClose {
+  color: #94a3b8;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.historyClose:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+.historyBody {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.historyItem {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.historyItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #8b5cf6;
+  transform: translateX(4px);
+}
+.historyItem h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+.historyItem p {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* History trigger button */
+.historyTriggerBtn {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 500;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-weight: 700;
   font-size: 0.9rem;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.historyTriggerBtn:hover {
+  transform: translateY(-2px) scale(1.05);
+  border-color: #8b5cf6;
+  box-shadow: 0 15px 30px rgba(139, 92, 246, 0.25);
+}
+
+/* Printable PDF styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .container {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+  }
+  .formCard, .toolbar, .tabs, .voiceBtn, .speakerBtn, .chatDrawer, .historyPanel, .historyTriggerBtn, .stubBtn, .stubPrice, .stubPrice + *, .airportCode + *, .flightPathLine::after {
+    display: none !important;
+  }
+  .layout {
+    grid-template-columns: 1fr !important;
+  }
+  .resultCard {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .boardingPass {
+    border: 1px solid #ddd !important;
+    background: transparent !important;
+    color: black !important;
+  }
+  .activityCard {
+    border: 1px solid #ddd !important;
+    background: transparent !important;
+    color: black !important;
+  }
+  .hotelCard {
+    border: 1px solid #ddd !important;
+    background: transparent !important;
+    color: black !important;
+  }
 }
