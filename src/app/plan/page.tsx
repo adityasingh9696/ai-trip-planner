@@ -48,8 +48,8 @@ export default function PlanPage() {
   const [formData, setFormData] = useState({
     destination: "",
     source: "",
-    check_in: new Date().toISOString().split("T")[0],
-    check_out: new Date(Date.now() + 5 * 86400000).toISOString().split("T")[0],
+    check_in: "",
+    check_out: "",
     budget: "Moderate (₹25,000 - ₹50,000)",
     companions: "Couple",
     interests: "",
@@ -645,6 +645,7 @@ export default function PlanPage() {
                   className={styles.input} 
                   value={formData.interests}
                   onChange={e => setFormData({...formData, interests: e.target.value})}
+                  placeholder="e.g. Beaches, Sightseeing"
                 />
                 <button 
                   type="button" 
@@ -653,6 +654,52 @@ export default function PlanPage() {
                 >
                   <Mic size={18} />
                 </button>
+              </div>
+              
+              {/* Quick Interest Tags selection list */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.75rem' }}>
+                {[
+                  "Beaches 🏖️", "Historical Forts 🏰", "Adventure Sports 🪂", 
+                  "Local Cuisine 🍲", "Nightlife 🌃", "Shopping 🛍️", 
+                  "Temples 🛕", "Nature & Wildlife 🦁", "Museums 🏛️"
+                ].map((interest, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      const cleanInterest = interest.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, "").trim();
+                      setFormData(prev => {
+                        const current = prev.interests.trim();
+                        if (!current) return { ...prev, interests: cleanInterest };
+                        const items = current.split(",").map(i => i.trim()).filter(Boolean);
+                        if (items.includes(cleanInterest)) return prev;
+                        return { ...prev, interests: [...items, cleanInterest].join(", ") };
+                      });
+                    }}
+                    style={{ 
+                      background: 'rgba(255,255,255,0.02)', 
+                      border: '1px solid rgba(255,255,255,0.06)', 
+                      borderRadius: '30px', 
+                      padding: '5px 12px', 
+                      fontSize: '0.8rem', 
+                      color: '#cbd5e1', 
+                      cursor: 'pointer', 
+                      transition: 'all 0.2s ease' 
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
+                      e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                      e.currentTarget.style.color = '#fff';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                      e.currentTarget.style.color = '#cbd5e1';
+                    }}
+                  >
+                    {interest}
+                  </button>
+                ))}
               </div>
             </div>
 
