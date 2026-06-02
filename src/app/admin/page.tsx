@@ -1,68 +1,191 @@
 "use client";
 
-import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   ShieldCheck, Users, Globe, RefreshCw, Server, 
-  Activity, ArrowLeft, ArrowRight, BarChart3, Settings, 
-  Database, Terminal, Play, CheckCircle2, AlertTriangle 
+  Activity, ArrowLeft, BarChart3, Settings, 
+  Database, Terminal, CheckCircle2, AlertTriangle,
+  Lock, KeyRound, Sliders, ToggleLeft, ToggleRight, 
+  Trash2, Play, DollarSign, Filter, Ban, CheckSquare
 } from "lucide-react";
 import styles from "../plan/page.module.css";
 
 export default function AdminPage() {
-  const { user, isLoaded } = useUser();
+  // Authentication Gate State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  // System Controls State
   const [liveSerp, setLiveSerp] = useState(true);
-  const [clearedLogs, setClearedLogs] = useState(false);
+  const [offlineFallback, setOfflineFallback] = useState(false);
+  const [commissionRate, setCommissionRate] = useState(5);
+  const [currency, setCurrency] = useState("INR");
+  const [quotaSlider, setQuotaSlider] = useState(82);
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const [logFilter, setLogFilter] = useState("all");
 
-  // Simulated Global Operational metrics
-  const systemMetrics = {
-    totalUsers: "1,248",
-    totalTrips: "4,892",
-    flightSuccessRate: "99.4%",
-    hotelAvgTime: "1.65s",
-    geminiQuota: "82.4%",
-  };
-
-  // Simulated Global Generated Trips log across all users
-  const globalTrips = [
-    { id: "1", user: "manager@corporate.com", dest: "Tokyo, Japan", origin: "Mumbai", budget: "Luxury", date: "2026-06-15", status: "Active" },
-    { id: "2", user: "dev.explorer@gmail.com", dest: "Paris, France", origin: "Delhi", budget: "Moderate", date: "2026-07-02", status: "Completed" },
-    { id: "3", user: "backpack.lisa@yahoo.com", dest: "Goa, India", origin: "Lucknow", budget: "Budget", date: "2026-06-10", status: "Active" },
-    { id: "4", user: "recruiter.premium@hiring.net", dest: "London, UK", origin: "Bengaluru", budget: "Luxury", date: "2026-08-20", status: "Queued" },
-  ];
+  // Sources checked by pricing crawler
+  const [searchSources, setSearchSources] = useState({
+    skyscanner: true,
+    googleflights: true,
+    expedia: true,
+    kayak: false
+  });
 
   // Simulated live logs from our Autonomous agents
-  const agentLogs = [
-    { time: "16:28:12", agent: "WeatherAgent", text: "Successfully resolved weather forecast for Goa: 31°C, light shower particles." },
-    { time: "16:28:15", agent: "FlightAgent", text: "SerpAPI token status: Valid. Extracted 3 comparative Indigo/Air India pricing boards." },
-    { time: "16:28:18", agent: "HotelAgent", text: "Fetched 5 luxury Calangute properties. Lowest rate detected: ₹2,800/night." },
-    { time: "16:28:22", agent: "OrchestratorAgent", text: "State merged. Recalculated 5-Day itinerary schema. Delivered final payload." }
-  ];
+  const [agentLogs, setAgentLogs] = useState([
+    { time: "23:14:02", agent: "WeatherAgent", text: "Successfully resolved weather forecast for Goa: 31°C, light shower particles.", type: "weather" },
+    { time: "23:14:05", agent: "FlightAgent", text: "SerpAPI check: Verified Skyscanner & Expedia price lists. Recommended cheaper Indigo ticket.", type: "flight" },
+    { time: "23:14:08", agent: "HotelAgent", text: "Matched 5 lodging spots. Filtered properties exceeding budget limit constraint.", type: "hotel" },
+    { time: "23:14:12", agent: "OrchestratorAgent", text: "State merged. Generated complete travel payload containing geocoded coords.", type: "orchestrator" },
+  ]);
 
-  if (!isLoaded) return <div className={styles.container} style={{ textAlign: 'center', padding: '10rem 0' }}>Syncing console credentials...</div>;
-  if (!user) return <div className={styles.container} style={{ textAlign: 'center', padding: '10rem 0' }}>Access Denied. Admin sign-in required.</div>;
+  // Simulated Global Users List
+  const [systemUsers, setSystemUsers] = useState([
+    { id: "1", email: "manager@corporate.com", tripsCount: 14, status: "Active", limit: "95%" },
+    { id: "2", email: "dev.explorer@gmail.com", tripsCount: 8, status: "Active", limit: "80%" },
+    { id: "3", email: "backpack.lisa@yahoo.com", tripsCount: 2, status: "Active", limit: "40%" },
+    { id: "4", email: "recruiter.premium@hiring.net", tripsCount: 22, status: "Suspended", limit: "0%" },
+  ]);
 
+  // Load auth session from sessionStorage to stay logged in on refresh
+  useEffect(() => {
+    const sessionAuth = sessionStorage.getItem("admin_authenticated");
+    if (sessionAuth === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === "admin" && password === "wanderai-secure-2026") {
+      setIsAuthenticated(true);
+      sessionStorage.setItem("admin_authenticated", "true");
+      setLoginError("");
+    } else {
+      setLoginError("Invalid administrator credentials. Access Denied.");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem("admin_authenticated");
+  };
+
+  // Log controls actions
+  const triggerScrapePulse = () => {
+    const timestamp = new Date().toTimeString().split(" ")[0];
+    const logEntries = [
+      { time: timestamp, agent: "FlightAgent", text: "Manual pulse request: Scraped live quotes across Skyscanner & Expedia.", type: "flight" },
+      { time: timestamp, agent: "HotelAgent", text: "Recalculating local exchange rates matching currency variable.", type: "hotel" }
+    ];
+    setAgentLogs((prev) => [...prev, ...logEntries]);
+  };
+
+  const resetUserLimit = (id: string) => {
+    setSystemUsers(prev => prev.map(u => u.id === id ? { ...u, limit: "100%", status: "Active" } : u));
+    alert(`Reset user limits and unsuspended account if applicable.`);
+  };
+
+  const suspendUser = (id: string) => {
+    setSystemUsers(prev => prev.map(u => u.id === id ? { ...u, limit: "0%", status: "Suspended" } : u));
+  };
+
+  const clearSystemLogs = () => {
+    setAgentLogs([]);
+    alert("Systems console streams purged.");
+  };
+
+  // Credentials Login View
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.container} style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className={styles.bgOrb1} />
+        <div className={styles.bgOrb2} />
+        
+        <div className={styles.formCard} style={{ width: '100%', maxWidth: '440px', padding: '3rem 2.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'inline-flex', background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '16px', borderRadius: '50%', color: '#a78bfa', marginBottom: '1rem' }}>
+              <Lock size={32} />
+            </div>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>Operations Gate</h2>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginTop: '0.25rem', fontWeight: 300 }}>System Administration Credentials Verification</p>
+          </div>
+
+          <form onSubmit={handleLoginSubmit}>
+            <div className={styles.formGroup}>
+              <label>Console Username</label>
+              <input 
+                type="text" 
+                required 
+                className={styles.input} 
+                placeholder="Enter admin username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+              />
+            </div>
+            <div className={styles.formGroup} style={{ marginBottom: '2rem' }}>
+              <label>Gate Password</label>
+              <input 
+                type="password" 
+                required 
+                className={styles.input} 
+                placeholder="••••••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </div>
+
+            {loginError && (
+              <div style={{ margin: '0 0 1.5rem 0', padding: '10px 14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', color: '#f87171', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertTriangle size={16} /> {loginError}
+              </div>
+            )}
+
+            <button type="submit" className={styles.submitBtn}>
+              <KeyRound size={18} /> Authenticate Console
+            </button>
+          </form>
+
+          <Link href="/" className={styles.backLink} style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem', marginBottom: 0 }}>
+            <ArrowLeft size={16} /> Return to Homepage
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Filtered logs list
+  const filteredLogs = logFilter === "all" ? agentLogs : agentLogs.filter(log => log.type === logFilter);
+
+  // Authenticated Admin Console View
   return (
     <div className={styles.container}>
       <div className={styles.bgOrb1} />
       <div className={styles.bgOrb2} />
 
-      <Link href="/dashboard" className={styles.backLink}>
-        <ArrowLeft size={20} /> Back to Dashboard
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
+        <Link href="/" className={styles.backLink} style={{ marginBottom: 0 }}>
+          <ArrowLeft size={20} /> Back Home
+        </Link>
+        <button onClick={handleLogout} className={styles.toolBtn} style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' }}>
+          Lock Session
+        </button>
+      </div>
 
-      <div className={styles.header} style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', position: 'relative', zIndex: 10 }}>
+      <div className={styles.header} style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', position: 'relative', zIndex: 10, marginTop: '2rem' }}>
         <div>
           <h1 style={{ fontSize: '2.75rem', background: 'linear-gradient(135deg, #fff, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <ShieldCheck size={40} style={{ color: '#8b5cf6' }} /> Operations Console
           </h1>
-          <p style={{ color: '#94a3b8', fontWeight: 300, fontSize: '1.15rem', marginTop: '0.25rem' }}>System Administrative Panel. Monitor pipelines, active threads, and global agent parameters.</p>
+          <p style={{ color: '#94a3b8', fontWeight: 300, fontSize: '1.15rem', marginTop: '0.25rem' }}>Global administrative configurations, API scrapers control panel, and system user databases.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Link href="/dashboard" className={styles.toolBtn} style={{ textDecoration: 'none' }}>
-            User Dashboard
+            User Workspace
           </Link>
           <Link href="/plan" className={styles.submitBtn} style={{ padding: '12px 24px', fontSize: '0.95rem', boxShadow: 'none', textDecoration: 'none' }}>
             Plan Trip
@@ -70,15 +193,15 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Analytics Summary Row */}
+      {/* Interactive Global Metrics cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginTop: '2.5rem', position: 'relative', zIndex: 10 }}>
         <div className={styles.formCard} style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6', padding: '12px', borderRadius: '12px' }}>
             <Users size={28} />
           </div>
           <div>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Active Users</p>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{systemMetrics.totalUsers}</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Active Swarms</p>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>4 Nodes</h3>
           </div>
         </div>
 
@@ -87,8 +210,8 @@ export default function AdminPage() {
             <Globe size={28} />
           </div>
           <div>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Total Plans</p>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{systemMetrics.totalTrips}</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Mock Overrides</p>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{offlineFallback ? "ONLINE" : "OFFLINE"}</h3>
           </div>
         </div>
 
@@ -97,8 +220,8 @@ export default function AdminPage() {
             <Activity size={28} />
           </div>
           <div>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Flights Uptime</p>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{systemMetrics.flightSuccessRate}</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Base Currency</p>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{currency}</h3>
           </div>
         </div>
 
@@ -107,100 +230,159 @@ export default function AdminPage() {
             <Server size={28} />
           </div>
           <div>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Hotel API latency</p>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{systemMetrics.hotelAvgTime}</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>SerpAPI Sandbox</p>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{liveSerp ? "ACTIVE" : "MOCKED"}</h3>
           </div>
         </div>
       </div>
 
       <div className={styles.layout} style={{ marginTop: '2.5rem', position: 'relative', zIndex: 10 }}>
-        {/* Left Side Controllers */}
+        
+        {/* Left Side: System Configurations */}
         <div className={styles.formCard}>
           <h2 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1.5rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Settings size={20} style={{ color: '#8b5cf6' }} /> Console Configuration
+            <Sliders size={20} style={{ color: '#8b5cf6' }} /> System Parameters
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            
+            {/* Live API Scraping Toggles */}
             <div>
-              <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>SerpAPI Sandbox Overrides</p>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <span style={{ fontSize: '0.9rem', color: '#cbd5e1' }}>Live APIs: {liveSerp ? "ON" : "OFF"}</span>
-                <button 
-                  type="button" 
-                  onClick={() => setLiveSerp(!liveSerp)} 
-                  className={styles.toolBtn} 
-                  style={{ padding: '6px 12px', background: liveSerp ? '#10b981' : '#ef4444', color: '#fff', border: 'none' }}
-                >
-                  Toggle
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>Live SerpAPI Scraping Engine</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>API Status: {liveSerp ? "Live" : "Sandbox Fallback"}</span>
+                <button type="button" onClick={() => setLiveSerp(!liveSerp)} style={{ cursor: 'pointer', color: liveSerp ? '#10b981' : '#64748b' }}>
+                  {liveSerp ? <ToggleRight size={38} /> : <ToggleLeft size={38} />}
                 </button>
               </div>
             </div>
 
+            {/* Offline Database Fallback Override Toggle */}
             <div>
-              <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>Database Management</p>
-              <button 
-                type="button" 
-                onClick={() => {
-                  setClearedLogs(true);
-                  alert("Global system execution cache cleared successfully.");
-                }} 
-                className={styles.toolBtn} 
-                style={{ width: '100%', justifyContent: 'center', gap: '0.5rem', border: clearedLogs ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.1)', color: clearedLogs ? '#10b981' : '#cbd5e1' }}
-              >
-                <Database size={18} /> {clearedLogs ? "Cache Flushed" : "Flush System Execution Cache"}
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>Offline Gemini Fallback Database</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '10px 14px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Force Offline fallback templates</span>
+                <button type="button" onClick={() => setOfflineFallback(!offlineFallback)} style={{ cursor: 'pointer', color: offlineFallback ? '#10b981' : '#64748b' }}>
+                  {offlineFallback ? <ToggleRight size={38} /> : <ToggleLeft size={38} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Price Crawler Sources Selector */}
+            <div>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>Ticket Scraper Crawler Sources</p>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 14px', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', color: '#cbd5e1' }}>
+                  <input type="checkbox" checked={searchSources.skyscanner} onChange={e => setSearchSources({...searchSources, skyscanner: e.target.checked})} />
+                  Skyscanner (Multi-Site Crawling)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', color: '#cbd5e1' }}>
+                  <input type="checkbox" checked={searchSources.googleflights} onChange={e => setSearchSources({...searchSources, googleflights: e.target.checked})} />
+                  Google Flights (Crawl direct rates)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', color: '#cbd5e1' }}>
+                  <input type="checkbox" checked={searchSources.expedia} onChange={e => setSearchSources({...searchSources, expedia: e.target.checked})} />
+                  Expedia Tickets
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer', color: '#cbd5e1' }}>
+                  <input type="checkbox" checked={searchSources.kayak} onChange={e => setSearchSources({...searchSources, kayak: e.target.checked})} />
+                  Kayak Scraper
+                </label>
+              </div>
+            </div>
+
+            {/* Currency Selector */}
+            <div>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>Operational Base Currency</p>
+              <select className={styles.select} value={currency} onChange={e => setCurrency(e.target.value)} style={{ padding: '10px 14px' }}>
+                <option value="INR">Indian Rupee (₹ - INR)</option>
+                <option value="USD">US Dollar ($ - USD)</option>
+                <option value="EUR">Euro (€ - EUR)</option>
+                <option value="JPY">Japanese Yen (¥ - JPY)</option>
+              </select>
+            </div>
+
+            {/* Extra Commission Markup */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>
+                <span>Commission Markup Override</span>
+                <span style={{ color: '#a78bfa' }}>{commissionRate}%</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="25" 
+                className={styles.slider} 
+                value={commissionRate} 
+                onChange={e => setCommissionRate(parseInt(e.target.value))} 
+                style={{ width: '100%', accentColor: '#8b5cf6', background: 'rgba(255,255,255,0.08)', borderRadius: '10px', height: '6px' }}
+              />
+            </div>
+
+            {/* Quota limit slider */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.5rem' }}>
+                <span>Gemini API Token Quota</span>
+                <span style={{ color: '#fbbf24' }}>{quotaSlider}% Remaining</span>
+              </div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                className={styles.slider} 
+                value={quotaSlider} 
+                onChange={e => setQuotaSlider(parseInt(e.target.value))} 
+                style={{ width: '100%', accentColor: '#fbbf24', background: 'rgba(255,255,255,0.08)', borderRadius: '10px', height: '6px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+              <button onClick={triggerScrapePulse} className={styles.toolBtn} style={{ flex: 1, padding: '10px', fontSize: '0.8rem', justifyContent: 'center' }}>
+                <Play size={14} /> Scraper Pulse
+              </button>
+              <button onClick={clearSystemLogs} className={styles.toolBtn} style={{ flex: 1, padding: '10px', fontSize: '0.8rem', justifyContent: 'center', color: '#f87171', borderColor: 'rgba(248,113,113,0.2)' }}>
+                Purge Console
               </button>
             </div>
 
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.5rem' }}>
-              <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.75rem' }}>Active Orchestrator Nodes</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: '#94a3b8' }}>WeatherAgent:</span>
-                  <span style={{ color: '#10b981', fontWeight: 700 }}>🟢 Active Idle</span>
-                </div>
-                <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: '#94a3b8' }}>FlightAgent:</span>
-                  <span style={{ color: '#10b981', fontWeight: 700 }}>🟢 Active Idle</span>
-                </div>
-                <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: '#94a3b8' }}>HotelAgent:</span>
-                  <span style={{ color: '#10b981', fontWeight: 700 }}>🟢 Active Idle</span>
-                </div>
-                <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: '#94a3b8' }}>ItineraryAgent:</span>
-                  <span style={{ color: '#10b981', fontWeight: 700 }}>🟢 Active Idle</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Right Side Logs & Archives */}
+        {/* Right Side: Tab Displays */}
         <div className={styles.resultCard}>
-          <div className={styles.tabs}>
+          <div className={styles.tabs} style={{ marginBottom: '1.5rem' }}>
             <button className={`${styles.tab} ${activeTab === "overview" ? styles.activeTab : ""}`} onClick={() => setActiveTab("overview")}>
-              <BarChart3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> System Records
+              <BarChart3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> User Directories
             </button>
             <button className={`${styles.tab} ${activeTab === "logs" ? styles.activeTab : ""}`} onClick={() => setActiveTab("logs")}>
-              <Terminal size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Live Agent Logs
+              <Terminal size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Agents Streams
             </button>
           </div>
 
           {activeTab === "overview" && (
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginBottom: '1.25rem' }}>Global Generated Trip Records</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginBottom: '1rem' }}>System Registered Accounts</h2>
+              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {globalTrips.map((trip) => (
-                  <div key={trip.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)', padding: '1rem 1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                {systemUsers.map(userItem => (
+                  <div key={userItem.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                      <h4 style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{trip.dest}</h4>
-                      <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '2px' }}>User: {trip.user} • From: {trip.origin}</p>
+                      <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600 }}>{userItem.email}</h4>
+                      <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Trips Generated: {userItem.tripsCount} • API Quota Usage: {userItem.limit}</p>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ display: 'inline-block', padding: '4px 10px', background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: '30px', fontSize: '0.75rem', fontWeight: 700 }}>
-                        {trip.status}
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '4px 10px', borderRadius: '30px', background: userItem.status === "Active" ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', color: userItem.status === "Active" ? '#10b981' : '#f87171', border: userItem.status === "Active" ? '1px solid rgba(16,185,129,0.1)' : '1px solid rgba(239,68,68,0.1)' }}>
+                        {userItem.status}
                       </span>
-                      <p style={{ color: '#cbd5e1', fontSize: '0.8rem', marginTop: '4px' }}>Date: {trip.date}</p>
+                      <button onClick={() => resetUserLimit(userItem.id)} className={styles.toolBtn} style={{ padding: '4px 8px', fontSize: '0.75rem', borderRadius: '6px' }} title="Reset Limits">
+                        Reset
+                      </button>
+                      {userItem.status === "Active" && (
+                        <button onClick={() => suspendUser(userItem.id)} className={styles.toolBtn} style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#f87171', borderColor: 'rgba(248,113,113,0.1)', borderRadius: '6px' }} title="Suspend User">
+                          <Ban size={12} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -210,25 +392,41 @@ export default function AdminPage() {
 
           {activeTab === "logs" && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>Terminal Stream</h2>
-                <button className={styles.toolBtn} onClick={() => alert("Updating active streams...")} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-                  <RefreshCw size={12} /> Refresh
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>Terminal Stream Logs</h2>
+                
+                {/* Log filters dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Filter size={14} style={{ color: '#a78bfa' }} />
+                  <select className={styles.select} value={logFilter} onChange={e => setLogFilter(e.target.value)} style={{ padding: '4px 8px', fontSize: '0.8rem', background: '#090d16', borderColor: 'rgba(255,255,255,0.08)', borderRadius: '6px', width: 'auto' }}>
+                    <option value="all">All Logs</option>
+                    <option value="weather">WeatherAgent</option>
+                    <option value="flight">FlightAgent</option>
+                    <option value="hotel">HotelAgent</option>
+                    <option value="orchestrator">OrchestratorAgent</option>
+                  </select>
+                </div>
               </div>
 
-              <div style={{ background: '#090d16', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '350px', overflowY: 'auto' }}>
-                {agentLogs.map((log, idx) => (
-                  <div key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.5rem' }}>
-                    <span style={{ color: '#64748b' }}>[{log.time}]</span>{' '}
-                    <span style={{ color: '#a78bfa', fontWeight: 700 }}>{log.agent}</span>:{' '}
-                    <span style={{ color: '#cbd5e1' }}>{log.text}</span>
+              <div style={{ background: '#090d16', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.25rem', fontFamily: 'monospace', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '420px', overflowY: 'auto' }}>
+                {filteredLogs.length > 0 ? (
+                  filteredLogs.map((log, idx) => (
+                    <div key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '0.5rem', lineHeight: '1.4' }}>
+                      <span style={{ color: '#64748b' }}>[{log.time}]</span>{' '}
+                      <span style={{ color: '#a78bfa', fontWeight: 700 }}>{log.agent}</span>:{' '}
+                      <span style={{ color: '#cbd5e1' }}>{log.text}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ color: '#94a3b8', textAlign: 'center', padding: '2rem 0' }}>
+                    No stream logs detected matching current filters.
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
         </div>
+
       </div>
     </div>
   );
