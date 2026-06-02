@@ -45,10 +45,10 @@ export default function AdminPage() {
 
   // Simulated Global Users List
   const [systemUsers, setSystemUsers] = useState([
-    { id: "1", email: "manager@corporate.com", tripsCount: 14, status: "Active", limit: "95%" },
-    { id: "2", email: "dev.explorer@gmail.com", tripsCount: 8, status: "Active", limit: "80%" },
-    { id: "3", email: "backpack.lisa@yahoo.com", tripsCount: 2, status: "Active", limit: "40%" },
-    { id: "4", email: "recruiter.premium@hiring.net", tripsCount: 22, status: "Suspended", limit: "0%" },
+    { id: "1", email: "manager@corporate.com", tripsCount: 14, status: "Active", limit: "95%", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" },
+    { id: "2", email: "dev.explorer@gmail.com", tripsCount: 8, status: "Active", limit: "80%", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" },
+    { id: "3", email: "backpack.lisa@yahoo.com", tripsCount: 2, status: "Active", limit: "40%", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" },
+    { id: "4", email: "recruiter.premium@hiring.net", tripsCount: 22, status: "Suspended", limit: "0%", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80" },
   ]);
 
   // Load auth session from sessionStorage to stay logged in on refresh
@@ -366,9 +366,16 @@ export default function AdminPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {systemUsers.map(userItem => (
                   <div key={userItem.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div>
-                      <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600 }}>{userItem.email}</h4>
-                      <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Trips Generated: {userItem.tripsCount} • API Quota Usage: {userItem.limit}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <img 
+                        src={userItem.avatar} 
+                        alt={userItem.email} 
+                        style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+                      />
+                      <div>
+                        <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600 }}>{userItem.email}</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>Trips Generated: {userItem.tripsCount} • API Quota Usage: {userItem.limit}</p>
+                      </div>
                     </div>
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
