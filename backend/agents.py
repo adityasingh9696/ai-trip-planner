@@ -100,17 +100,48 @@ def weather_agent(state: TripState):
         weather = f"Could not fetch weather: {e}"
     return {"weather_info": weather}
 
+def resolve_iata(city_name: str) -> str:
+    city = city_name.split(',')[0].strip()
+    if not city:
+        return "N/A"
+    
+    # Check local map first (case-insensitive)
+    city_lower = city.lower()
+    for name, code in IATA_MAP.items():
+        if city_lower == name or city_lower.startswith(name) or name.startswith(city_lower):
+            return code
+            
+    # Ask Gemini to resolve to IATA code
+    prompt = f"""
+    Find the 3-letter IATA airport code for the city: "{city}".
+    If the city does not have a commercial airport with regular commercial flights, respond strictly with the word "N/A".
+    Do not include markdown, explanation, or extra spaces. Just the 3-letter code or "N/A".
+    """
+    try:
+        response = llm.invoke([SystemMessage(content="You are a strict IATA resolver."), HumanMessage(content=prompt)])
+        code = response.content.strip().upper()
+        if len(code) == 3 and code.isalpha():
+            return code
+    except Exception:
+        pass
+    return "N/A"
+
 # 2. Flight Agent Node
 def flight_agent(state: TripState):
     from tools import get_flight_prices
     
-    # Resolve IATA codes locally using mapping to avoid hitting Gemini rate limits
     try:
-        origin = state.get("source", "Lucknow").strip().lower()
-        origin_code = IATA_MAP.get(origin, "LKO")
+        origin = state.get("source", "Lucknow").strip()
+        dest = state.get("destination", "Goa").strip()
         
-        dest_clean = state['destination'].strip().lower()
-        dest_code = IATA_MAP.get(dest_clean, "GOI")
+        origin_code = resolve_iata(origin)
+        dest_code = resolve_iata(dest)
+        
+        if origin_code == "N/A" or dest_code == "N/A":
+            return {
+                "flight_info": f"No direct commercial flights exist between {origin} and {dest}.",
+                "flights_list": []
+            }
             
         flight_date = state.get("check_in")
         if not flight_date:
