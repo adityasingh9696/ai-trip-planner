@@ -22,11 +22,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from typing import Optional
+
 class TripRequest(BaseModel):
     destination: str
-    source: str
-    check_in: str
-    check_out: str
+    source: Optional[str] = "Lucknow"
+    check_in: Optional[str] = None
+    check_out: Optional[str] = None
     budget: str
     companions: str
     interests: str
@@ -38,22 +40,28 @@ def read_root():
     return {"message": "FastAPI Orchestrator is running"}
 
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 @app.post("/api/generate-trip")
 def generate_trip(request: TripRequest, db: Session = Depends(get_db)):
     try:
-        # Dynamically calculate days
-        d1 = datetime.strptime(request.check_in, "%Y-%m-%d")
-        d2 = datetime.strptime(request.check_out, "%Y-%m-%d")
+        # Backwards compatibility fallbacks for date calculations
+        check_in_str = request.check_in
+        check_out_str = request.check_out
+        if not check_in_str or not check_out_str:
+            check_in_str = date.today().strftime("%Y-%m-%d")
+            check_out_str = (date.today() + timedelta(days=5)).strftime("%Y-%m-%d")
+            
+        d1 = datetime.strptime(check_in_str, "%Y-%m-%d")
+        d2 = datetime.strptime(check_out_str, "%Y-%m-%d")
         days = max(1, (d2 - d1).days)
         
         # Initialize state for LangGraph
         initial_state = {
             "destination": request.destination,
-            "source": request.source,
-            "check_in": request.check_in,
-            "check_out": request.check_out,
+            "source": request.source or "Lucknow",
+            "check_in": check_in_str,
+            "check_out": check_out_str,
             "days": days,
             "budget": request.budget,
             "companions": request.companions,
