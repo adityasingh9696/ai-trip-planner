@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 
+export const maxDuration = 60; // Set Vercel serverless timeout limit to 60 seconds (max allowed on Hobby plans)
+
 export async function POST(req: Request) {
   try {
     const user = await currentUser();
