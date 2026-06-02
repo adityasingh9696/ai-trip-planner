@@ -228,8 +228,9 @@ export default function PlanPage() {
       }
 
       window.speechSynthesis.cancel();
+      const acts = activities || [];
       const textToSpeak = `Day ${dayNumber}: ${dayTheme}. ` + 
-        activities.map((act) => `At ${act.time}, visit ${act.name}. ${act.description}.`).join(" ");
+        acts.map((act: any) => `At ${act.time}, visit ${act.name}. ${act.description}.`).join(" ");
 
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.onend = () => setPlayingVoiceDay(null);
@@ -662,7 +663,7 @@ export default function PlanPage() {
                             <span className={styles.dayTheme}>Day Theme</span>
                           </span>
                         </h3>
-                        {day.activities.map((act: any, idx: number) => (
+                        {(day.activities || []).map((act: any, idx: number) => (
                           <div key={idx} className={styles.activityCard}>
                             <div className={styles.activityHeader}>
                               <span className={styles.activityTime}>{act.time}</span>
