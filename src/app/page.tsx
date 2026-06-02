@@ -143,26 +143,26 @@ export default async function Home() {
       {/* Cheapest Flight Ticket Engine Illustration Card */}
       <section className={styles.ticketSection}>
         <div className={styles.sectionHeader}>
-          <h2>Autonomous Flight Cost Comparison</h2>
-          <p>We crawl major ticket platforms automatically to verify and suggest the absolute cheapest rates.</p>
+          <h2>Autonomous Booking Price Checks</h2>
+          <p>We crawl flight and hotel databases in real-time to locate and recommend the absolute cheapest option.</p>
         </div>
-        <div className={styles.ticketComparisonCard}>
+        <div className={styles.ticketComparisonCard} style={{ marginBottom: '2.5rem' }}>
           <div className={styles.ticketCardHeader}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plane size={20} style={{ color: '#a78bfa' }} />
-              <span style={{ fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Routing check: DEL ➔ TYO</span>
+              <span style={{ fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Flight check: DEL ➔ TYO</span>
             </div>
-            <span className={styles.liveEngineBadge}>🟢 Comparison Engine Active</span>
+            <span className={styles.liveEngineBadge}>🟢 Flight Engine Active</span>
           </div>
           
           <div className={styles.sitesGrid}>
             <div className={styles.siteItem}>
-              <span>Skyscanner quote</span>
+              <span>Skyscanner price</span>
               <strong>₹42,850</strong>
             </div>
             <div className={`${styles.siteItem} ${styles.siteItemCheapest}`}>
               <span className={styles.cheapestBadge}>Best Value (Recommended)</span>
-              <span>WanderAI Flight Agent</span>
+              <span>WanderAI Scraper</span>
               <strong>₹38,200</strong>
             </div>
             <div className={styles.siteItem}>
@@ -171,7 +171,37 @@ export default async function Home() {
             </div>
           </div>
           <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8', marginTop: '1.25rem', fontWeight: 300 }}>
-            ✨ Multi-Agent checked pricing across 3 networks. Lowest rate highlighted dynamically in your Daily workspace panel.
+            ✈️ Checked airline networks. Lowest rate highlighted dynamically in your Daily workspace panel with deep-link redirects.
+          </p>
+        </div>
+
+        {/* Hotel Cost Comparison Card */}
+        <div className={styles.ticketComparisonCard}>
+          <div className={styles.ticketCardHeader}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Hotel size={20} style={{ color: '#ec4899' }} />
+              <span style={{ fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Lodging check: Tokyo luxury Resort</span>
+            </div>
+            <span className={styles.liveEngineBadge} style={{ color: '#ec4899', background: 'rgba(236,72,153,0.08)', borderColor: 'rgba(236,72,153,0.2)' }}>🟢 Hotel Engine Active</span>
+          </div>
+          
+          <div className={styles.sitesGrid}>
+            <div className={styles.siteItem}>
+              <span>Agoda rate</span>
+              <strong>₹14,500/N</strong>
+            </div>
+            <div className={`${styles.siteItem} ${styles.siteItemCheapest}`} style={{ borderColor: 'rgba(236,72,153,0.4)', background: 'rgba(236,72,153,0.03)' }}>
+              <span className={styles.cheapestBadge} style={{ background: '#ec4899' }}>Cheapest Option</span>
+              <span>WanderAI Hotel Scraper</span>
+              <strong style={{ color: '#ec4899' }}>₹11,200/N</strong>
+            </div>
+            <div className={styles.siteItem}>
+              <span>Booking.com price</span>
+              <strong>₹14,900/N</strong>
+            </div>
+          </div>
+          <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8', marginTop: '1.25rem', fontWeight: 300 }}>
+            🏨 Scanned top hotel databases. Recommends the lowest rates automatically and maps direct Booking.com search pathways.
           </p>
         </div>
       </section>

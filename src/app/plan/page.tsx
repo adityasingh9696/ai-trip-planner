@@ -180,6 +180,42 @@ export default function PlanPage() {
     return locs;
   };
 
+  // Redirect handlers for Flight Skyscanner bookings and Hotel Booking.com checks
+  const getAirportCode = (city: string) => {
+    const name = city.toLowerCase();
+    if (name.includes("goa")) return "GOI";
+    if (name.includes("lucknow")) return "LKO";
+    if (name.includes("delhi")) return "DEL";
+    if (name.includes("mumbai")) return "BOM";
+    if (name.includes("tokyo")) return "NRT";
+    if (name.includes("paris")) return "CDG";
+    if (name.includes("bali")) return "DPS";
+    if (name.includes("london")) return "LHR";
+    if (name.includes("bengaluru") || name.includes("bangalore")) return "BLR";
+    return city.substring(0, 3).toUpperCase();
+  };
+
+  const handleFlightBooking = (flight: any) => {
+    const fromCode = getAirportCode(formData.source).toLowerCase();
+    const toCode = getAirportCode(formData.destination || itinerary?.tripDetails?.destination).toLowerCase();
+    const date = formData.check_in;
+    const cleanDate = date.replace(/-/g, "").substring(2); // YYMMDD format
+    
+    // Skyscanner deep search redirect
+    const redirectUrl = `https://www.skyscanner.co.in/transport/flights/${fromCode}/${toCode}/${cleanDate}`;
+    window.open(redirectUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleHotelBooking = (hotel: any) => {
+    const hotelName = encodeURIComponent(hotel.name);
+    const checkin = formData.check_in;
+    const checkout = formData.check_out;
+    
+    // Booking.com search query parameter redirect
+    const redirectUrl = `https://www.booking.com/searchresults.html?ss=${hotelName}&checkin=${checkin}&checkout=${checkout}`;
+    window.open(redirectUrl, "_blank", "noopener,noreferrer");
+  };
+
   // 🎙️ Speech-to-Text Voice Dictation Hook
   const startSpeechRecognition = (fieldName: string) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -349,24 +385,34 @@ export default function PlanPage() {
       );
     }
 
+    // Find the minimum price in the flights array
+    const minPrice = Math.min(...flights.map((f: any) => f.price));
+
     return (
       <div className={styles.flightGrid}>
         {flights.map((flight: any, idx: number) => {
           const cheapestDiff = idx % 2 === 0 ? 420 : 650;
+          const isCheapest = flight.price === minPrice;
           return (
-            <div key={idx} className={styles.boardingPass} style={{ flexDirection: 'column', gap: '1rem', borderStyle: 'solid', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+            <div key={idx} className={styles.boardingPass} style={{ flexDirection: 'column', gap: '1rem', borderStyle: 'solid', borderColor: isCheapest ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.08)' }}>
               {/* Cheapest Badge */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem', width: '100%' }}>
-                <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontSize: '0.75rem', fontWeight: 800, padding: '4px 10px', borderRadius: '30px', border: '1px solid rgba(16, 185, 129, 0.2)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  🏆 cheapest ticket recommended
-                </span>
+                {isCheapest ? (
+                  <span style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontSize: '0.75rem', fontWeight: 800, padding: '4px 10px', borderRadius: '30px', border: '1px solid rgba(16, 185, 129, 0.2)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    🏆 cheapest ticket recommended
+                  </span>
+                ) : (
+                  <span style={{ background: 'rgba(255, 255, 255, 0.03)', color: '#cbd5e1', fontSize: '0.75rem', fontWeight: 600, padding: '4px 10px', borderRadius: '30px', border: '1px solid rgba(255, 255, 255, 0.08)', textTransform: 'uppercase' }}>
+                    Alternative flight option
+                  </span>
+                )}
                 <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Verified from 3 sites</span>
               </div>
 
               <div style={{ display: 'flex', width: '100%', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div className={styles.flightMain}>
                   <div>
-                    <span className={styles.airportCode}>{formData.source.substring(0, 3).toUpperCase()}</span>
+                    <span className={styles.airportCode}>{getAirportCode(formData.source)}</span>
                     <p className={styles.airportTime}>{flight.departure || "06:15 AM"}</p>
                   </div>
                   <div className={styles.flightRoute}>
@@ -375,13 +421,15 @@ export default function PlanPage() {
                     <p style={{ fontSize: "0.85rem", color: "#a78bfa", marginTop: "6px", fontWeight: 600 }}>{flight.airline}</p>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <span className={styles.airportCode}>{formData.destination.substring(0, 3).toUpperCase()}</span>
+                    <span className={styles.airportCode}>{getAirportCode(formData.destination)}</span>
                     <p className={styles.airportTime}>{flight.arrival || "08:45 AM"}</p>
                   </div>
                 </div>
                 <div className={styles.flightStub}>
                   <span className={styles.stubPrice}>₹{flight.price.toLocaleString("en-IN")}</span>
-                  <button className={styles.stubBtn} onClick={() => alert(`Redirecting to book flight on ${flight.airline} for ₹${flight.price}!`)}>Book cheapest</button>
+                  <button className={styles.stubBtn} onClick={() => handleFlightBooking(flight)} style={{ background: isCheapest ? '#10b981' : '#8b5cf6' }}>
+                    {isCheapest ? "Book Cheapest" : "Book Ticket"}
+                  </button>
                 </div>
               </div>
 
@@ -423,7 +471,7 @@ export default function PlanPage() {
     return (
       <div className={styles.hotelGrid}>
         {hotels.map((hotel: any, idx: number) => (
-          <div key={idx} className={styles.hotelCard}>
+          <div key={idx} className={styles.hotelCard} style={{ cursor: 'pointer' }} onClick={() => handleHotelBooking(hotel)}>
             <div className={styles.hotelCover} style={{ backgroundImage: `url(${destinationImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'})` }}>
               <span className={styles.hotelPriceBadge}>₹{hotel.price.toLocaleString("en-IN")}/N</span>
             </div>
@@ -434,7 +482,9 @@ export default function PlanPage() {
                 <span className={styles.hotelRating}>
                   <Star size={16} fill="#fbbf24" stroke="none" /> {hotel.rating || "4.5"}
                 </span>
-                <span style={{ color: "#94a3b8" }}>({hotel.reviews_count || 320} reviews)</span>
+                <button className={styles.toolBtn} style={{ padding: '6px 14px', fontSize: '0.8rem', background: '#ec4899', borderColor: 'rgba(236,72,153,0.3)', color: '#fff' }}>
+                  Book Lodging
+                </button>
               </div>
             </div>
           </div>
