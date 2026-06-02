@@ -180,7 +180,7 @@ export default function PlanPage() {
     return locs;
   };
 
-  // Redirect handlers for Flight Skyscanner bookings and Hotel Booking.com checks
+  // Redirect handlers for Flight Google Flights bookings and Hotel Booking.com checks
   const getAirportCode = (city: string) => {
     const name = city.toLowerCase();
     if (name.includes("goa")) return "GOI";
@@ -196,13 +196,12 @@ export default function PlanPage() {
   };
 
   const handleFlightBooking = (flight: any) => {
-    const fromCode = getAirportCode(formData.source).toLowerCase();
-    const toCode = getAirportCode(formData.destination || itinerary?.tripDetails?.destination).toLowerCase();
-    const date = formData.check_in;
-    const cleanDate = date.replace(/-/g, "").substring(2); // YYMMDD format
+    const fromCode = getAirportCode(formData.source).toUpperCase();
+    const toCode = getAirportCode(formData.destination || itinerary?.tripDetails?.destination).toUpperCase();
+    const date = formData.check_in; // Format: YYYY-MM-DD
     
-    // Skyscanner deep search redirect
-    const redirectUrl = `https://www.skyscanner.co.in/transport/flights/${fromCode}/${toCode}/${cleanDate}`;
+    // Google Flights search URL - pre-filled with parameter queries
+    const redirectUrl = `https://www.google.com/travel/flights?q=Flights%20to%20${toCode}%20from%20${fromCode}%20on%20${date}`;
     window.open(redirectUrl, "_blank", "noopener,noreferrer");
   };
 
