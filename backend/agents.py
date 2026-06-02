@@ -53,7 +53,19 @@ IATA_MAP = {
     "singapore": "SIN",
     "tokyo": "HND",
     "bangkok": "BKK",
-    "india": "DEL"
+    "india": "DEL",
+    "uk": "LHR",
+    "united kingdom": "LHR",
+    "england": "LHR",
+    "usa": "JFK",
+    "united states": "JFK",
+    "united states of america": "JFK",
+    "france": "CDG",
+    "japan": "HND",
+    "thailand": "BKK",
+    "germany": "FRA",
+    "spain": "MAD",
+    "italy": "FCO"
 }
 
 # Define the State our graph will pass around

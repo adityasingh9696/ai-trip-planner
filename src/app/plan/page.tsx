@@ -55,6 +55,10 @@ export default function PlanPage() {
     interests: "Beaches, Local Seafood, Sunset Cruises, Historical Forts",
   });
 
+  // Autocomplete suggestions states
+  const [sourceSuggestions, setSourceSuggestions] = useState<any[]>([]);
+  const [destSuggestions, setDestSuggestions] = useState<any[]>([]);
+
   // Convex Database hooks
   const storeUser = useMutation(api.users.store);
   const currentUser = useQuery(api.users.getCurrentUser, user ? { clerkId: user.id } : "skip");
@@ -67,6 +71,46 @@ export default function PlanPage() {
       storeUser({ clerkId: user.id, email: user.emailAddresses[0]?.emailAddress || "" });
     }
   }, [user, storeUser]);
+
+  // Fetch OpenStreetMap Autocomplete Suggestions
+  const fetchSuggestions = async (text: string, type: "source" | "destination") => {
+    if (!text.trim() || text.length < 2) {
+      if (type === "source") setSourceSuggestions([]);
+      else setDestSuggestions([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(text)}&limit=5&addressdetails=1`);
+      if (res.ok) {
+        const data = await res.json();
+        const formatted = data.map((item: any) => {
+          const parts = [];
+          const addr = item.address || {};
+          if (addr.city) parts.push(addr.city);
+          else if (addr.town) parts.push(addr.town);
+          else if (addr.village) parts.push(addr.village);
+          else if (addr.state) parts.push(addr.state);
+          
+          if (addr.country) parts.push(addr.country);
+          
+          const cleanName = parts.length > 0 ? parts.join(", ") : item.display_name;
+          return {
+            name: cleanName,
+            fullname: item.display_name
+          };
+        });
+
+        // Filter duplicates
+        const unique = formatted.filter((v: any, i: any, a: any) => a.findIndex((t: any) => t.name === v.name) === i);
+
+        if (type === "source") setSourceSuggestions(unique);
+        else setDestSuggestions(unique);
+      }
+    } catch (err) {
+      console.error("Autocomplete fetch error", err);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -387,15 +431,19 @@ export default function PlanPage() {
         {/* Left Side Parameters card */}
         <div className={styles.formCard}>
           <form onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label>Source City</label>
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+              <label>Source (City / Country)</label>
               <div className={styles.inputWrapper}>
                 <input 
                   type="text" 
                   required 
                   className={styles.input} 
                   value={formData.source}
-                  onChange={e => setFormData({...formData, source: e.target.value})}
+                  onChange={e => {
+                    setFormData({...formData, source: e.target.value});
+                    fetchSuggestions(e.target.value, "source");
+                  }}
+                  placeholder="e.g. Lucknow, India or UK"
                 />
                 <button 
                   type="button" 
@@ -405,9 +453,27 @@ export default function PlanPage() {
                   <Mic size={18} />
                 </button>
               </div>
+
+              {/* Source Autocomplete list */}
+              {sourceSuggestions.length > 0 && (
+                <ul className={styles.autocompleteList}>
+                  {sourceSuggestions.map((item, idx) => (
+                    <li 
+                      key={idx} 
+                      className={styles.autocompleteItem}
+                      onClick={() => {
+                        setFormData({ ...formData, source: item.name });
+                        setSourceSuggestions([]);
+                      }}
+                    >
+                      📍 {item.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            <div className={styles.formGroup}>
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
               <label>Destination (City / Country)</label>
               <div className={styles.inputWrapper}>
                 <input 
@@ -415,7 +481,11 @@ export default function PlanPage() {
                   required 
                   className={styles.input} 
                   value={formData.destination}
-                  onChange={e => setFormData({...formData, destination: e.target.value})}
+                  onChange={e => {
+                    setFormData({...formData, destination: e.target.value});
+                    fetchSuggestions(e.target.value, "destination");
+                  }}
+                  placeholder="e.g. Goa, India or Japan"
                 />
                 <button 
                   type="button" 
@@ -425,6 +495,24 @@ export default function PlanPage() {
                   <Mic size={18} />
                 </button>
               </div>
+
+              {/* Destination Autocomplete list */}
+              {destSuggestions.length > 0 && (
+                <ul className={styles.autocompleteList}>
+                  {destSuggestions.map((item, idx) => (
+                    <li 
+                      key={idx} 
+                      className={styles.autocompleteItem}
+                      onClick={() => {
+                        setFormData({ ...formData, destination: item.name });
+                        setDestSuggestions([]);
+                      }}
+                    >
+                      📍 {item.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className={styles.formRow}>
