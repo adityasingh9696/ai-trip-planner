@@ -117,7 +117,8 @@ export default function PlanPage() {
     setLoading(true);
     setEmailStatus(null);
     try {
-      const res = await fetch("/api/generate-itinerary", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://ai-trip-planner-eh3u.onrender.com";
+      const res = await fetch(`${backendUrl}/api/generate-trip`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -290,7 +291,8 @@ export default function PlanPage() {
     setRecalculating(true);
 
     try {
-      const res = await fetch("/api/recalculate", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "https://ai-trip-planner-eh3u.onrender.com";
+      const res = await fetch(`${backendUrl}/api/recalculate-trip`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

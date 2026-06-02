@@ -17,6 +17,7 @@ app.add_middleware(
         "http://localhost:3001",
         "https://ai-trip-planner-jet-eight.vercel.app"
     ],
+    allow_origin_regex=r"https://ai-trip-planner-.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
