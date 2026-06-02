@@ -159,6 +159,8 @@ def itinerary_agent(state: TripState):
     IMPORTANT: Always format all estimated costs in the local currency of the destination (e.g., Rupee/INR for India).
     Ensure you incorporate the Live Data into your cost estimations and activity planning.
     
+    CRITICAL COORDINATE RULES: You MUST generate real, geographically accurate latitude (lat) and longitude (lng) coordinates for every activity spot! Do not leave them as 0.0 placeholders. For example, if destination is Goa, Baga Beach is approximately lat: 15.552, lng: 73.751.
+    
     Respond STRICTLY with valid JSON matching the following structure exactly. Do not include markdown formatting or backticks outside the JSON.
     {{
       "tripDetails": {{
@@ -181,8 +183,8 @@ def itinerary_agent(state: TripState):
               "description": "Brief description",
               "cost": "Cost estimate",
               "location": {{
-                "lat": 0.0,
-                "lng": 0.0
+                "lat": 15.552,
+                "lng": 73.751
               }}
             }}
           ]
