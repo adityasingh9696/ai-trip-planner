@@ -408,7 +408,7 @@ export default function PlanPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label>Destination City</label>
+              <label>Destination (City / Country)</label>
               <div className={styles.inputWrapper}>
                 <input 
                   type="text" 
