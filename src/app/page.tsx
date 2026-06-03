@@ -1,3 +1,4 @@
+// Landing page of the AI-Powered Multi-Agent Travel Planner
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
