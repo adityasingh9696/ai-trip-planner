@@ -1,3 +1,4 @@
+// Root layout of Next.js travel planner application
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
