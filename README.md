@@ -124,3 +124,10 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 The API server will run at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+
+---
+
+## 🌐 Deployment & Hosting
+
+* **Frontend Application**: Hosted on **Vercel Cloud**, leveraging edge serverless execution for high-speed page delivery and API proxy routing.
+* **Database & BaaS**: Powered by **Convex Cloud** for live reactive database synchronization and **Clerk** for user authentication management.
