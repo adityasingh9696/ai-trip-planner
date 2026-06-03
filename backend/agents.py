@@ -7,6 +7,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 
+# Initialize datetime and load project environment files
 import datetime
 
 # Load env vars
