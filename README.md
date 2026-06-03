@@ -8,16 +8,48 @@ An advanced, full-stack travel planning application powered by a custom multi-ag
 
 ## 🚀 Key Features
 
-* **Multi-Agent Orchestration**: Powered by a stateful **LangGraph** workflow in Python coordinating concurrent agents (Weather, Flights, Hotels, and Itinerary builder) utilizing **Gemini 2.5 Flash** for dynamic synthesis.
-* **Live API Integrations**: Integrates OpenWeatherMap and SerpApi (Google Flights & Google Hotels) to fetch live real-time pricing and conditions.
-* **Flexible Flights Engine**: Supports both **one-way and round-trip** flight aggregation, using geographical coordinate solvers to automatically route suburban regions (e.g., Navi Mumbai, Noida, Gurgaon) to their nearest active commercial airport hubs (e.g., BOM, DEL) within a 150km radius.
-* **Dynamic Travelers Form**: Expands to collect traveler ages and genders for Couples, Groups, and Families to accurately calculate weighted budget estimations.
-* **Timeline Lodging & Dining**: Detailed interactive timeline detailing daily stay locations (🏨 Lodging) and custom meal plans (🍽️ Breakfast, Lunch, Dinner).
-* **Cost Breakdowns**: Dynamic **Estimated Travel Budget** widget displaying flight, hotel, activity, and meal cost splits.
-* **Voice Dictation**: Hands-free voice inputs utilizing the **Web Speech API** with custom browser-permission warning alerts.
-* **Print-Specific PDF Export**: Tailored print-media styling (`@media print`) rendering a clean, high-contrast black-on-white printable booklet while hiding UI controls.
-* **Database & Ownership Locks**: Managed via **Clerk** authenticated user states and object-level permissions, preventing unauthorized access to saved itineraries.
-* **Live Admin Dashboard**: Interactive administrative directory listing real-time database accounts and saved trip counters.
+## Key Features
+
+### AI-Powered Multi-Agent Planning
+
+Leverages a stateful **LangGraph** workflow that coordinates multiple specialized agents for weather forecasting, flight discovery, hotel recommendations, and itinerary generation. The final travel plan is synthesized using **Gemini 2.5 Flash**.
+
+### Real-Time Travel Intelligence
+
+Fetches live weather updates and travel information through integrations with **OpenWeatherMap** and **SerpApi**, providing current flight fares, hotel availability, and destination conditions.
+
+### Smart Flight Search
+
+Supports both **one-way** and **round-trip** journeys. The system automatically maps nearby cities and suburbs such as Navi Mumbai, Noida, and Gurgaon to the closest operational airport hubs, ensuring accurate route selection.
+
+### Adaptive Traveler Profiles
+
+Dynamically generates traveler input forms for solo travelers, couples, families, and groups. Additional traveler details help produce more realistic budget calculations and trip recommendations.
+
+### Day-Wise Stay and Meal Planning
+
+Generates a structured travel timeline that includes accommodation details and suggested meal schedules for breakfast, lunch, and dinner throughout the trip.
+
+### Budget Estimation Dashboard
+
+Provides a detailed cost summary covering flights, accommodation, food, and activities, allowing users to understand expected travel expenses at a glance.
+
+### Voice-Based Input
+
+Enables itinerary creation through voice commands using the **Web Speech API**, with built-in browser permission handling and user guidance.
+
+### Printable PDF-Friendly Layout
+
+Includes dedicated print styling that converts itineraries into a clean, high-contrast travel booklet optimized for PDF export and physical printing.
+
+### Secure User Data Management
+
+Uses **Clerk Authentication** and ownership-based access controls to ensure users can only access and manage their own saved itineraries.
+
+### Administrative Insights Panel
+
+Offers a live dashboard for administrators to monitor registered users, stored itineraries, and platform activity in real time.
+
 
 ---
 
