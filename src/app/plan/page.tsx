@@ -9,7 +9,7 @@ import Link from "next/link";
 import { 
   ArrowLeft, Mic, Volume2, VolumeX, MessageSquare, History, 
   FileText, Mail, Send, X, Calendar, MapPin, DollarSign, 
-  Users, Award, Star, Compass, AlertCircle, Info, Sparkles 
+  Users, Award, Star, Compass, AlertCircle, Info, Sparkles, ShieldAlert 
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -19,7 +19,7 @@ const Map = dynamic(() => import('@/components/Map'), {
 });
 
 export default function PlanPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [loading, setLoading] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
   const [itinerary, setItinerary] = useState<any>(null);
@@ -55,6 +55,9 @@ export default function PlanPage() {
     interests: "",
   });
 
+  // Dynamic travelers details state (ages & genders)
+  const [travelerDetails, setTravelerDetails] = useState<{ age: number; gender: string }[]>([]);
+
   // Autocomplete suggestions states
   const [sourceSuggestions, setSourceSuggestions] = useState<any[]>([]);
   const [destSuggestions, setDestSuggestions] = useState<any[]>([]);
@@ -64,6 +67,66 @@ export default function PlanPage() {
   const currentUser = useQuery(api.users.getCurrentUser, user ? { clerkId: user.id } : "skip");
   const pastTrips = useQuery(api.trips.getUserTrips, currentUser ? { userId: currentUser._id } : "skip");
   const createTrip = useMutation(api.trips.createTrip);
+
+  // Load URL query parameter
+  const [loadTripId, setLoadTripId] = useState<string | null>(null);
+  const loadedTrip = useQuery(api.trips.getTripById, loadTripId ? { tripId: loadTripId as any } : "skip");
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tripId = params.get("load");
+      if (tripId) {
+        setLoadTripId(tripId);
+      }
+    }
+  }, []);
+
+  // Handle companion changes to update travelers age/gender forms dynamically
+  useEffect(() => {
+    const comp = (formData.companions || "").toLowerCase();
+    if (comp.includes("solo")) {
+      setTravelerDetails([]);
+    } else if (comp.includes("couple")) {
+      setTravelerDetails([{ age: 28, gender: "Female" }]);
+    } else if (comp.includes("friends") || comp.includes("family") || comp.includes("group")) {
+      setTravelerDetails([
+        { age: 25, gender: "Male" },
+        { age: 25, gender: "Female" }
+      ]);
+    } else {
+      setTravelerDetails([]);
+    }
+  }, [formData.companions]);
+
+  // Retrieve/Verify trip details from query param loads
+  useEffect(() => {
+    if (loadedTrip) {
+      if (currentUser) {
+        if (loadedTrip.userId === currentUser._id) {
+          // Authorized
+          setItinerary(loadedTrip.itineraryData);
+          setFormData({
+            destination: loadedTrip.destination,
+            source: loadedTrip.itineraryData.tripDetails?.source || "Lucknow",
+            check_in: loadedTrip.startDate,
+            check_out: loadedTrip.endDate,
+            budget: loadedTrip.budget,
+            companions: loadedTrip.itineraryData.tripDetails?.companions || "Couple",
+            interests: loadedTrip.itineraryData.tripDetails?.interests || "Beaches, Sightseeing"
+          });
+          setPermissionError(null);
+        } else {
+          setPermissionError("Access Restricted: This trip itinerary is private and only visible to its creator.");
+          setItinerary(null);
+        }
+      } else if (isLoaded && !user) {
+        setPermissionError("Access Restricted: Please sign in to view this trip itinerary.");
+        setItinerary(null);
+      }
+    }
+  }, [loadedTrip, currentUser, user, isLoaded]);
 
   // Store user in Convex DB on load if Clerk authenticated
   useEffect(() => {
@@ -121,7 +184,10 @@ export default function PlanPage() {
       const res = await fetch(`${backendUrl}/api/generate-trip`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          traveler_details: travelerDetails
+        }),
       });
 
       if (!res.ok) {
@@ -237,6 +303,13 @@ export default function PlanPage() {
     recognition.onerror = (e: any) => {
       console.error("STT Error", e);
       setListeningField(null);
+      if (e.error === 'not-allowed') {
+        alert("Microphone permission was denied. Please allow microphone access in your browser settings to use voice input.");
+      } else if (e.error === 'no-speech') {
+        alert("No speech was detected. Please try speaking closer to the microphone.");
+      } else {
+        alert(`Microphone error: ${e.error || "unknown"}. Please ensure your microphone is plugged in and configured correctly.`);
+      }
     };
 
     recognition.onend = () => {
@@ -252,7 +325,12 @@ export default function PlanPage() {
       }
     };
 
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (err: any) {
+      console.error("Failed to start speech recognition", err);
+      setListeningField(null);
+    }
   };
 
   // 🔊 Text-to-Speech Voice Synthesizer
@@ -641,6 +719,81 @@ export default function PlanPage() {
               </select>
             </div>
 
+            {/* 👥 Dynamic Travelers Details Section (Age, Gender) */}
+            {formData.companions && (formData.companions.toLowerCase().includes("couple") || formData.companions.toLowerCase().includes("friends") || formData.companions.toLowerCase().includes("family") || formData.companions.toLowerCase().includes("group")) && (
+              <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#a78bfa', textTransform: 'uppercase', margin: 0 }}>
+                    Travelers Details
+                  </h4>
+                  {(formData.companions.toLowerCase().includes("friends") || formData.companions.toLowerCase().includes("family") || formData.companions.toLowerCase().includes("group")) && (
+                    <select 
+                      className={styles.select} 
+                      style={{ width: 'auto', padding: '4px 8px', fontSize: '0.8rem', height: 'auto', background: '#090d16' }}
+                      value={travelerDetails.length}
+                      onChange={(e) => {
+                        const count = parseInt(e.target.value);
+                        const updated = [...travelerDetails];
+                        if (count > updated.length) {
+                          for (let i = updated.length; i < count; i++) {
+                            updated.push({ age: 25, gender: "Male" });
+                          }
+                        } else {
+                          updated.splice(count);
+                        }
+                        setTravelerDetails(updated);
+                      }}
+                    >
+                      {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                        <option key={n} value={n}>{n} People</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {travelerDetails.map((traveler, index) => (
+                    <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Traveler {index + 1} Age</label>
+                        <input 
+                          type="number" 
+                          min="1" 
+                          max="120"
+                          required
+                          className={styles.input} 
+                          style={{ padding: '8px 12px', fontSize: '0.9rem' }}
+                          value={traveler.age} 
+                          onChange={(e) => {
+                            const updated = [...travelerDetails];
+                            updated[index].age = parseInt(e.target.value) || 25;
+                            setTravelerDetails(updated);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Traveler {index + 1} Gender</label>
+                        <select 
+                          className={styles.select} 
+                          style={{ padding: '8px 12px', fontSize: '0.9rem' }}
+                          value={traveler.gender} 
+                          onChange={(e) => {
+                            const updated = [...travelerDetails];
+                            updated[index].gender = e.target.value;
+                            setTravelerDetails(updated);
+                          }}
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className={styles.formGroup}>
               <label>Interests / Desired Spots</label>
               <div className={styles.inputWrapper}>
@@ -715,7 +868,18 @@ export default function PlanPage() {
 
         {/* Right Side Workspace */}
         <div className={styles.resultCard}>
-          {itinerary ? (
+          {permissionError ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#f87171', padding: '5rem 3rem', textAlign: 'center' }}>
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '16px', borderRadius: '50%', marginBottom: '1.5rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldAlert size={48} />
+              </div>
+              <h2 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 700 }}>Access Restricted</h2>
+              <p style={{ maxWidth: '400px', fontWeight: 300, color: '#cbd5e1', lineHeight: '1.5', fontSize: '0.95rem' }}>{permissionError}</p>
+              <Link href="/dashboard" className={styles.toolBtn} style={{ marginTop: '1.5rem', display: 'inline-flex', textDecoration: 'none' }}>
+                Return to Workspace Dashboard
+              </Link>
+            </div>
+          ) : itinerary ? (
             <div>
               {/* Cover Banner */}
               <div className={styles.heroBanner}>
@@ -731,6 +895,29 @@ export default function PlanPage() {
                 {itinerary.weather && (
                   <div className={styles.weatherBadge}>
                     ☀️ {itinerary.weather}
+                  </div>
+                )}
+              </div>
+
+              {/* 💰 Cost Breakdown Card */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '1.5rem', marginBottom: '2rem', position: 'relative', zIndex: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', marginBottom: '1rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800 }}>Estimated Travel Budget</h3>
+                    <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '2px' }}>Based on {itinerary.tripDetails?.days} Days for {formData.companions}</p>
+                  </div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#10b981' }}>
+                    {itinerary.tripDetails?.totalEstimatedCost}
+                  </div>
+                </div>
+                {itinerary.tripDetails?.costBreakdown && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                    {Object.entries(itinerary.tripDetails.costBreakdown).map(([key, val]: any) => (
+                      <div key={key} style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '10px', padding: '0.75rem 1rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>{key}</span>
+                        <span style={{ fontSize: '0.95rem', color: '#cbd5e1', fontWeight: 600 }}>{val}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -793,6 +980,28 @@ export default function PlanPage() {
                             <span className={styles.dayTheme}>Day Theme</span>
                           </span>
                         </h3>
+
+                        {/* 🏨 Stay & Dining Info Card */}
+                        {(day.accommodation || day.meals) && (
+                          <div className={styles.accommodationCard}>
+                            {day.accommodation && (
+                              <div className={styles.stayRow}>
+                                <span style={{ color: '#a78bfa', fontWeight: 700 }}>🏨 Stay:</span>{' '}
+                                <span style={{ color: '#fff' }}>{day.accommodation}</span>
+                              </div>
+                            )}
+                            {day.meals && (
+                              <div className={styles.mealsRow}>
+                                <span style={{ color: '#ec4899', fontWeight: 700, display: 'inline-block', minWidth: '70px' }}>🍽️ Dining:</span>{' '}
+                                <span style={{ color: '#cbd5e1', fontSize: '0.9rem' }}>
+                                  {day.meals.breakfast && `Breakfast: ${day.meals.breakfast} | `}
+                                  {day.meals.lunch && `Lunch: ${day.meals.lunch} | `}
+                                  {day.meals.dinner && `Dinner: ${day.meals.dinner}`}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         {(day.activities || []).map((act: any, idx: number) => (
                           <div key={idx} className={styles.activityCard}>
                             <div className={styles.activityHeader}>
@@ -904,6 +1113,110 @@ export default function PlanPage() {
           </button>
         </form>
       </div>
+
+      {/* 📄 Hidden Printable Section for high-fidelity PDF downloads */}
+      {itinerary && (
+        <div className={styles.printSection}>
+          <div className={styles.printHeader}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.5rem', color: '#000' }}>
+              {itinerary.tripDetails?.destination} Travel Itinerary
+            </h1>
+            <p style={{ fontSize: '1.1rem', color: '#555', marginBottom: '1.5rem' }}>
+              From {itinerary.tripDetails?.source} • {itinerary.tripDetails?.days} Days • Designed for {formData.companions}
+            </p>
+            
+            <div style={{ border: '2px solid #000', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', color: '#000' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ddd', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
+                <span style={{ fontWeight: 800, fontSize: '1.2rem' }}>Total Estimated Budget:</span>
+                <span style={{ fontWeight: 800, fontSize: '1.2rem' }}>{itinerary.tripDetails?.totalEstimatedCost}</span>
+              </div>
+              {itinerary.tripDetails?.costBreakdown && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.9rem' }}>
+                  {Object.entries(itinerary.tripDetails.costBreakdown).map(([k, v]: any) => (
+                    <div key={k}>
+                      <span style={{ textTransform: 'uppercase', fontWeight: 700, color: '#444' }}>{k}:</span> {v}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <h2 style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.75rem', color: '#000' }}>Daily Schedule & Plan</h2>
+            {itinerary.itinerary?.map((day: any) => (
+              <div key={day.day} style={{ pageBreakInside: 'avoid', borderBottom: '1px solid #eee', paddingBottom: '1.5rem', color: '#000' }}>
+                <h3 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#000' }}>
+                  Day {day.day}: {day.theme}
+                </h3>
+                {day.accommodation && (
+                  <p style={{ margin: '0 0 0.25rem 0', fontWeight: 600, color: '#000' }}>🏨 Stay: {day.accommodation}</p>
+                )}
+                {day.meals && (
+                  <p style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: '#333' }}>
+                    🍽️ Dining:
+                    {day.meals.breakfast && ` Breakfast: ${day.meals.breakfast} | `}
+                    {day.meals.lunch && ` Lunch: ${day.meals.lunch} | `}
+                    {day.meals.dinner && ` Dinner: ${day.meals.dinner}`}
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.75rem' }}>
+                  {day.activities?.map((act: any, idx: number) => (
+                    <div key={idx} style={{ background: '#f9f9f9', border: '1px solid #e3e3e3', borderRadius: '8px', padding: '1rem', color: '#000' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '0.95rem', marginBottom: '0.25rem', color: '#000' }}>
+                        <span>{act.time} - {act.name}</span>
+                        <span>{act.cost}</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: '#444' }}>{act.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Flights Comparative Print */}
+          {itinerary.flights && itinerary.flights.length > 0 && (
+            <div style={{ marginTop: '3rem', pageBreakBefore: 'always', color: '#000' }}>
+              <h2 style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.75rem', marginBottom: '1.5rem', color: '#000' }}>Flights Comparative Options</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {itinerary.flights.map((flight: any, idx: number) => (
+                  <div key={idx} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '1rem', display: 'flex', justifyContent: 'space-between', color: '#000' }}>
+                    <div>
+                      <strong style={{ fontSize: '1.1rem', color: '#000' }}>{flight.airline}</strong>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: '#000' }}>Route: {itinerary.tripDetails?.source} to {itinerary.tripDetails?.destination}</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '0.85rem', color: '#555' }}>Departure: {flight.departure} | Arrival: {flight.arrival} ({flight.duration})</p>
+                    </div>
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <strong style={{ fontSize: '1.4rem', color: '#000' }}>₹{flight.price.toLocaleString("en-IN")}</strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Hotels Grid Print */}
+          {itinerary.hotels && itinerary.hotels.length > 0 && (
+            <div style={{ marginTop: '3rem', pageBreakBefore: 'always', color: '#000' }}>
+              <h2 style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', fontSize: '1.75rem', marginBottom: '1.5rem', color: '#000' }}>Hotels Lodging Options</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                {itinerary.hotels.map((hotel: any, idx: number) => (
+                  <div key={idx} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '1rem', pageBreakInside: 'avoid', color: '#000' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#000' }}>{hotel.name}</h3>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', color: '#444' }}>{hotel.address}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #eee', paddingTop: '0.5rem', fontWeight: 700, color: '#000' }}>
+                      <span>Rating: {hotel.rating || "4.5"} ⭐</span>
+                      <span>₹{hotel.price.toLocaleString("en-IN")}/Night</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

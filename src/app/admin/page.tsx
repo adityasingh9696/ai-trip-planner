@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { 
   ShieldCheck, Users, Globe, RefreshCw, Server, 
   Activity, ArrowLeft, BarChart3, Settings, 
@@ -11,7 +13,17 @@ import {
 } from "lucide-react";
 import styles from "../plan/page.module.css";
 
+const avatars = [
+  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80",
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80"
+];
+
 export default function AdminPage() {
+  const users = useQuery(api.users.getAllUsers);
+  const trips = useQuery(api.trips.getAllTrips);
+
   // Authentication Gate State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
@@ -43,13 +55,21 @@ export default function AdminPage() {
     { time: "23:14:12", agent: "OrchestratorAgent", text: "State merged. Generated complete travel payload containing geocoded coords.", type: "orchestrator" },
   ]);
 
-  // Simulated Global Users List
-  const [systemUsers, setSystemUsers] = useState([
-    { id: "1", email: "manager@corporate.com", tripsCount: 14, status: "Active", limit: "95%", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" },
-    { id: "2", email: "dev.explorer@gmail.com", tripsCount: 8, status: "Active", limit: "80%", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" },
-    { id: "3", email: "backpack.lisa@yahoo.com", tripsCount: 2, status: "Active", limit: "40%", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" },
-    { id: "4", email: "recruiter.premium@hiring.net", tripsCount: 22, status: "Suspended", limit: "0%", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&q=80" },
-  ]);
+  // Local state for user overrides (e.g. mock status changes or limits)
+  const [userOverrides, setUserOverrides] = useState<Record<string, { status?: string; limit?: string }>>({});
+
+  const systemUsers = (users || []).map((u: any, idx: number) => {
+    const userTrips = trips ? trips.filter((t: any) => t.userId === u._id) : [];
+    const override = userOverrides[u._id] || {};
+    return {
+      id: u._id,
+      email: u.email,
+      tripsCount: userTrips.length,
+      status: override.status || "Active",
+      limit: override.limit || "100%",
+      avatar: avatars[idx % avatars.length]
+    };
+  });
 
   // Load auth session from sessionStorage to stay logged in on refresh
   useEffect(() => {
@@ -86,12 +106,19 @@ export default function AdminPage() {
   };
 
   const resetUserLimit = (id: string) => {
-    setSystemUsers(prev => prev.map(u => u.id === id ? { ...u, limit: "100%", status: "Active" } : u));
+    setUserOverrides(prev => ({
+      ...prev,
+      [id]: { ...prev[id], limit: "100%", status: "Active" }
+    }));
     alert(`Reset user limits and unsuspended account if applicable.`);
   };
 
   const suspendUser = (id: string) => {
-    setSystemUsers(prev => prev.map(u => u.id === id ? { ...u, limit: "0%", status: "Suspended" } : u));
+    setUserOverrides(prev => ({
+      ...prev,
+      [id]: { ...prev[id], limit: "0%", status: "Suspended" }
+    }));
+    alert(`Account suspended.`);
   };
 
   const clearSystemLogs = () => {
@@ -200,8 +227,8 @@ export default function AdminPage() {
             <Users size={28} />
           </div>
           <div>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Active Swarms</p>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>4 Nodes</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Registered Users</p>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{users ? `${users.length} Users` : "Loading..."}</h3>
           </div>
         </div>
 
@@ -210,8 +237,8 @@ export default function AdminPage() {
             <Globe size={28} />
           </div>
           <div>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Mock Overrides</p>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{offlineFallback ? "ONLINE" : "OFFLINE"}</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 600 }}>Total Trip Plans</p>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{trips ? `${trips.length} Trips` : "Loading..."}</h3>
           </div>
         </div>
 

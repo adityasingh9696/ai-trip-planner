@@ -23,7 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from typing import Optional
+from typing import Optional, List
+
+class TravelerDetail(BaseModel):
+    age: int
+    gender: str
 
 class TripRequest(BaseModel):
     destination: str
@@ -33,6 +37,7 @@ class TripRequest(BaseModel):
     budget: str
     companions: str
     interests: str
+    traveler_details: Optional[List[TravelerDetail]] = None
 
 from agents import trip_orchestrator
 
@@ -67,6 +72,7 @@ def generate_trip(request: TripRequest, db: Session = Depends(get_db)):
             "budget": request.budget,
             "companions": request.companions,
             "interests": request.interests,
+            "traveler_details": [t.dict() for t in request.traveler_details] if request.traveler_details else [],
             "weather_info": "",
             "flight_info": "",
             "hotel_info": "",

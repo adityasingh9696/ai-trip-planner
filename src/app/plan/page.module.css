@@ -900,7 +900,35 @@
   color: #fff;
 }
 
+/* Accommodation and Meals Card */
+.accommodationCard {
+  background: rgba(139, 92, 246, 0.03);
+  border: 1px dashed rgba(139, 92, 246, 0.25);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.stayRow {
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mealsRow {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 0.5rem;
+}
+
 /* Printable PDF styles */
+.printSection {
+  display: none;
+}
+
 @media print {
   body {
     background: white !important;
@@ -911,31 +939,16 @@
     color: black !important;
     padding: 0 !important;
   }
-  .formCard, .toolbar, .tabs, .voiceBtn, .speakerBtn, .chatDrawer, .historyPanel, .historyTriggerBtn, .stubBtn, .stubPrice, .stubPrice + *, .airportCode + *, .flightPathLine::after {
+  .layout, .formCard, .header, .backLink, .historyTriggerBtn, .chatDrawer {
     display: none !important;
   }
-  .layout {
-    grid-template-columns: 1fr !important;
-  }
-  .resultCard {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-  }
-  .boardingPass {
-    border: 1px solid #ddd !important;
-    background: transparent !important;
+  .printSection {
+    display: block !important;
+    background: white !important;
     color: black !important;
   }
-  .activityCard {
-    border: 1px solid #ddd !important;
-    background: transparent !important;
+  .printSection * {
     color: black !important;
-  }
-  .hotelCard {
-    border: 1px solid #ddd !important;
-    background: transparent !important;
-    color: black !important;
+    text-shadow: none !important;
   }
 }

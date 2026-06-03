@@ -33,3 +33,18 @@ export const getUserTrips = query({
       .collect();
   },
 });
+
+export const getAllTrips = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("trips").collect();
+  },
+});
+
+export const getTripById = query({
+  args: { tripId: v.id("trips") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.tripId);
+  },
+});
+

@@ -79,6 +79,7 @@ class TripState(TypedDict):
     budget: str
     companions: str
     interests: str
+    traveler_details: List[dict]
     
     # Results from tools/agents
     weather_info: str
@@ -254,8 +255,81 @@ def generate_fallback_itinerary(state: TripState) -> dict:
     # 1. Resolve base coordinates
     lat, lng = get_coordinates_osm(dest)
     
-    # 2. Check if the destination is Ayodhya
+    # Let's count total travelers
+    traveler_details = state.get("traveler_details", [])
+    num_travelers = len(traveler_details)
+    if num_travelers == 0:
+        num_travelers = 1
+        
+    budget_lower = state.get('budget', '').lower()
+    
+    # Define price multipliers
+    if "under" in budget_lower or "budget" in budget_lower or "backpacker" in budget_lower:
+        flight_rate = 4500
+        hotel_rate = 1500
+        activity_rate = 400
+        meal_rate = 350
+        tier_label = "Budget/Backpacker"
+    elif "moderate" in budget_lower or "standard" in budget_lower:
+        flight_rate = 7500
+        hotel_rate = 3500
+        activity_rate = 850
+        meal_rate = 650
+        tier_label = "Moderate/Standard"
+    else:
+        flight_rate = 15000
+        hotel_rate = 9000
+        activity_rate = 2000
+        meal_rate = 1500
+        tier_label = "Luxury/Premium"
+        
     dest_lower = dest.lower()
+    if "ayodhya" in dest_lower:
+        if "budget" in tier_label.lower():
+            selected_hotel_name = "Shree Ram Guest House, Ayodhya"
+        elif "moderate" in tier_label.lower():
+            selected_hotel_name = "Royal Heritage Hotel, Ayodhya"
+        else:
+            selected_hotel_name = "The Taj Palace Ayodhya"
+    elif "goa" in dest_lower:
+        if "budget" in tier_label.lower():
+            selected_hotel_name = "Baga Beach Backpackers, Goa"
+        elif "moderate" in tier_label.lower():
+            selected_hotel_name = "Whispering Palms Beach Resort, Goa"
+        else:
+            selected_hotel_name = "Taj Exotica Resort & Spa, Goa"
+    elif "tokyo" in dest_lower:
+        if "budget" in tier_label.lower():
+            selected_hotel_name = "Capsule Inn Shinjuku, Tokyo"
+        elif "moderate" in tier_label.lower():
+            selected_hotel_name = "Shinjuku Washington Hotel, Tokyo"
+        else:
+            selected_hotel_name = "The Ritz-Carlton Tokyo"
+    else:
+        if "budget" in tier_label.lower():
+            selected_hotel_name = f"{dest} Eco-Lodge & Homestay"
+        elif "moderate" in tier_label.lower():
+            selected_hotel_name = f"{dest} Plaza & Suites"
+        else:
+            selected_hotel_name = f"The Grand Palace & Resort, {dest}"
+            
+    rooms_needed = max(1, (num_travelers + 1) // 2) # 2 people per room
+    total_flights = flight_rate * num_travelers
+    total_hotels = hotel_rate * rooms_needed * max(1, days - 1)
+    total_activities = activity_rate * num_travelers * days
+    total_meals = meal_rate * num_travelers * days
+    
+    grand_total = total_flights + total_hotels + total_activities + total_meals
+    
+    totalEstimatedCost = f"₹{grand_total:,}"
+    costBreakdown = {
+        "flights": f"₹{total_flights:,} (₹{flight_rate:,} x {num_travelers} travelers)",
+        "hotels": f"₹{total_hotels:,} ({rooms_needed} room(s) x {max(1, days - 1)} night(s) at ₹{hotel_rate:,}/night)",
+        "activities": f"₹{total_activities:,} (₹{activity_rate:,}/day per traveler)",
+        "meals": f"₹{total_meals:,} (₹{meal_rate:,}/day per traveler)"
+    }
+    
+    # 2. Check if the destination is Ayodhya
     if "ayodhya" in dest_lower:
         # Predefined rich itinerary for Ayodhya (up to 5 days, or longer by looping)
         ayodhya_activities = [
@@ -423,6 +497,12 @@ def generate_fallback_itinerary(state: TripState) -> dict:
             itinerary.append({
                 "day": i + 1,
                 "theme": themes[day_idx],
+                "accommodation": selected_hotel_name,
+                "meals": {
+                    "breakfast": "Complimentary buffet at " + selected_hotel_name,
+                    "lunch": "Traditional satvik thali at local temple prasad center",
+                    "dinner": "Signature local Awadhi dinner"
+                },
                 "activities": ayodhya_activities[day_idx]
             })
             
@@ -576,6 +656,12 @@ def generate_fallback_itinerary(state: TripState) -> dict:
             itinerary.append({
                 "day": i + 1,
                 "theme": themes[day_idx],
+                "accommodation": selected_hotel_name,
+                "meals": {
+                    "breakfast": "Complimentary breakfast buffet at " + selected_hotel_name,
+                    "lunch": "Local specialty lunch on tour",
+                    "dinner": "Signature dining experience"
+                },
                 "activities": day_activities
             })
             
@@ -586,7 +672,8 @@ def generate_fallback_itinerary(state: TripState) -> dict:
             "check_in": check_in,
             "check_out": check_out,
             "days": days,
-            "totalEstimatedCost": "₹35,000 (API Offline Mode)",
+            "totalEstimatedCost": totalEstimatedCost,
+            "costBreakdown": costBreakdown,
             "currency": "INR"
         },
         "itinerary": itinerary
@@ -594,6 +681,13 @@ def generate_fallback_itinerary(state: TripState) -> dict:
 
 # 4. Orchestrator / Itinerary Agent Node
 def itinerary_agent(state: TripState):
+    traveler_details = state.get("traveler_details", [])
+    travelers_str = ""
+    if traveler_details:
+        travelers_str = "\nTravelers list:\n" + "\n".join([f"- Traveler {i+1}: Age {t['age']}, Gender {t['gender']}" for i, t in enumerate(traveler_details)])
+    else:
+        travelers_str = "\nTraveler: 1 Solo traveler (unspecified age/gender)"
+
     prompt = f"""
     You are an expert travel agent. Generate a detailed, highly-optimized itinerary for the following trip:
     Destination: {state['destination']}
@@ -601,8 +695,8 @@ def itinerary_agent(state: TripState):
     Check-in Date: {state.get('check_in', '')}
     Check-out Date: {state.get('check_out', '')}
     Duration: {state['days']} days
-    Budget: {state['budget']}
-    Companions: {state['companions']}
+    Budget Class/Limit: {state['budget']}
+    Companions Type: {state['companions']}{travelers_str}
     Interests: {state['interests']}
     
     Live Data Found by our specialized agents:
@@ -610,10 +704,13 @@ def itinerary_agent(state: TripState):
     - Flight options: {state['flight_info']}
     - Hotel options: {state['hotel_info']}
     
-    IMPORTANT: Always format all estimated costs in the local currency of the destination (e.g., Rupee/INR for India).
-    Ensure you incorporate the Live Data into your cost estimations and activity planning.
+    IMPORTANT RULES FOR COST & MEALS & LODGING:
+    1. Always format all estimated costs in the local currency of the destination (e.g., Rupee/INR for India).
+    2. Incorporate the Live Data into your cost estimations and activity planning.
+    3. You must provide a clean cost breakdown ("costBreakdown") in "tripDetails" detailing the cost of Flights, Hotels, Activities, and Meals based on the budget and number of travelers.
+    4. For EACH DAY in the itinerary, you MUST specify the hotel or lodging ("accommodation") where they are staying that night, and the daily meal details ("meals") including breakfast, lunch, and dinner. E.g., if hotels live data suggests a hotel name, use that hotel for accommodation!
     
-    CRITICAL COORDINATE RULES: You MUST generate real, geographically accurate latitude (lat) and longitude (lng) coordinates for every activity spot! Do not leave them as 0.0 placeholders. For example, if destination is Goa, Baga Beach is approximately lat: 15.552, lng: 73.751.
+    CRITICAL COORDINATE RULES: You MUST generate real, geographically accurate latitude (lat) and longitude (lng) coordinates for every activity spot! Do not leave them as 0.0 placeholders.
     
     Respond STRICTLY with valid JSON matching the following structure exactly. Do not include markdown formatting or backticks outside the JSON.
     {{
@@ -623,13 +720,25 @@ def itinerary_agent(state: TripState):
         "check_in": "{state.get('check_in', '')}",
         "check_out": "{state.get('check_out', '')}",
         "days": {state['days']},
-        "totalEstimatedCost": "Estimated cost string",
+        "totalEstimatedCost": "Total estimated cost string e.g. ₹54,000",
+        "costBreakdown": {{
+          "flights": "Cost explanation e.g. ₹15,000",
+          "hotels": "Cost explanation e.g. ₹20,000",
+          "activities": "Cost explanation e.g. ₹12,000",
+          "meals": "Cost explanation e.g. ₹7,000"
+        }},
         "currency": "INR"
       }},
       "itinerary": [
         {{
           "day": 1,
           "theme": "Theme of the day",
+          "accommodation": "Name of hotel or stay, e.g. Baga Beach Resort",
+          "meals": {{
+            "breakfast": "e.g. Buffet at hotel",
+            "lunch": "e.g. Local seafood at beach shack",
+            "dinner": "e.g. Beachfront dining"
+          }},
           "activities": [
             {{
               "time": "09:00 AM",
