@@ -89,11 +89,15 @@ export default function PlanPage() {
     if (comp.includes("solo")) {
       setTravelerDetails([]);
     } else if (comp.includes("couple")) {
-      setTravelerDetails([{ age: 28, gender: "Female" }]);
+      setTravelerDetails([
+        { age: 28, gender: "Male" },
+        { age: 28, gender: "Female" }
+      ]);
     } else if (comp.includes("friends") || comp.includes("family") || comp.includes("group")) {
       setTravelerDetails([
         { age: 25, gender: "Male" },
-        { age: 25, gender: "Female" }
+        { age: 25, gender: "Female" },
+        { age: 25, gender: "Male" }
       ]);
     } else {
       setTravelerDetails([]);
