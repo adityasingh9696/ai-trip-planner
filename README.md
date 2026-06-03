@@ -8,7 +8,6 @@ An advanced, full-stack travel planning application powered by a custom multi-ag
 
 ## 🚀 Key Features
 
-## Key Features
 
 ### AI-Powered Multi-Agent Planning
 
