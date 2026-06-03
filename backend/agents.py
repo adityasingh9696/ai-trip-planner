@@ -35,8 +35,14 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
 IATA_MAP = {
     "goa": "GOI",
     "mumbai": "BOM",
+    "navi mumbai": "BOM",
     "delhi": "DEL",
     "new delhi": "DEL",
+    "noida": "DEL",
+    "gurgaon": "DEL",
+    "ghaziabad": "DEL",
+    "greater noida": "DEL",
+    "ayodhya": "AYJ",
     "jaipur": "JAI",
     "lucknow": "LKO",
     "bangalore": "BLR",
@@ -116,7 +122,8 @@ def resolve_iata(city_name: str) -> str:
     # Ask Gemini to resolve to IATA code
     prompt = f"""
     Find the 3-letter IATA airport code for the city: "{city}".
-    If the city does not have a commercial airport with regular commercial flights, respond strictly with the word "N/A".
+    If the city does not have its own commercial airport with regular commercial flights, find the 3-letter IATA code for the nearest major active commercial airport serving that city (within 150km, e.g., BOM for Navi Mumbai, DEL for Noida).
+    If no major commercial airport serves this city within 150km, respond strictly with the word "N/A".
     Do not include markdown, explanation, or extra spaces. Just the 3-letter code or "N/A".
     """
     try:
