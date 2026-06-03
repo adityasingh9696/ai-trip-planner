@@ -1,6 +1,7 @@
 {
   "name": "ai-trip-planner",
   "version": "0.1.0",
+  "description": "AI-powered travel planner combining Next.js frontend and Python multi-agent backend.",
   "private": true,
   "scripts": {
     "dev": "next dev",

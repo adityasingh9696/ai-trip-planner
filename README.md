@@ -1,5 +1,7 @@
 # AI-Powered Multi-Agent Travel Planner
 
+A modern travel planning app that combines AI agents, live travel data, and personalized itinerary generation to help users book smarter journeys.
+
 An advanced, full-stack travel planning application powered by a custom multi-agent LangGraph system that automates destination research, lodging lookups, flight aggregation, and day-by-day itinerary synthesis based on user constraints, travel companions, and dynamic budgets.
 
 ---
