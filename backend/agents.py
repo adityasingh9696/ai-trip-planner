@@ -156,7 +156,12 @@ def flight_agent(state: TripState):
         if not flight_date:
             flight_date = (datetime.date.today() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
             
-        flights_str = get_flight_prices.invoke({"origin": origin_code, "destination": dest_code, "date": flight_date})
+        return_date = state.get("check_out")
+        query_args = {"origin": origin_code, "destination": dest_code, "date": flight_date}
+        if return_date and return_date != flight_date:
+            query_args["return_date"] = return_date
+            
+        flights_str = get_flight_prices.invoke(query_args)
         try:
             flights_list = json.loads(flights_str)
         except Exception:

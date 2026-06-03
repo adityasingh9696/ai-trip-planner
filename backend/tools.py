@@ -31,7 +31,7 @@ def get_weather(location: str, date: str = None) -> str:
 
 
 @tool
-def get_flight_prices(origin: str, destination: str, date: str) -> str:
+def get_flight_prices(origin: str, destination: str, date: str, return_date: str = None) -> str:
     """
     Fetches estimated live flight prices using Google Flights via SerpApi.
     Requires SERPAPI_API_KEY environment variable.
@@ -54,11 +54,13 @@ def get_flight_prices(origin: str, destination: str, date: str) -> str:
       "departure_id": origin,
       "arrival_id": destination,
       "outbound_date": date,
-      "type": "2",
+      "type": "1" if return_date else "2",
       "currency": "INR",
       "hl": "en",
       "api_key": api_key
     }
+    if return_date:
+        params["return_date"] = return_date
     
     try:
         response = requests.get("https://serpapi.com/search", params=params)
