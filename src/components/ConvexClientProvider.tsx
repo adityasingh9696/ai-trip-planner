@@ -1,5 +1,6 @@
 "use client";
 
+// Convex client provider wrapper integrated with Clerk authentication
 import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
