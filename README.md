@@ -194,3 +194,12 @@ The API server will run at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 - Convex provides real-time database synchronization and backend persistence.
 - Clerk manages user authentication and access control.
 - FastAPI services can be deployed independently to support scalable AI workflow execution.
+
+## 🔮 Future Enhancements
+
+- Multi-city trip planning support
+- Collaborative itinerary sharing
+- Personalized attraction recommendations
+- AI-generated packing checklists
+- Currency conversion and expense tracking
+- Offline itinerary access
