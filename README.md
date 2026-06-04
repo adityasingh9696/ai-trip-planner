@@ -1,6 +1,8 @@
 # AI-Powered Multi-Agent Travel Planner
 
-A modern travel planning app that combines AI agents, live travel data, and personalized itinerary generation to help users book smarter journeys.
+An intelligent travel planning platform that combines multi-agent AI workflows, real-time travel data, and personalized recommendations to generate complete trip itineraries tailored to user preferences and budgets.
+
+The application automates destination research, flight discovery, accommodation recommendations, and itinerary generation through a coordinated LangGraph-based orchestration system.
 
 An advanced, full-stack travel planning application powered by a custom multi-agent LangGraph system that automates destination research, lodging lookups, flight aggregation, and day-by-day itinerary synthesis based on user constraints, travel companions, and dynamic budgets.
 
@@ -76,24 +78,41 @@ Offers a live dashboard for administrators to monitor registered users, stored i
 
 ## 📐 System Architecture
 
-The travel planner utilizes a stateful multi-agent system coordinating independent data-gathering nodes before synthesizing the final itinerary:
+The platform follows a stateful, multi-agent architecture where specialized agents independently gather travel intelligence before a centralized orchestrator combines the results into a unified itinerary.
 
 ```mermaid
 graph TD
-    A[Next.js Frontend] -->|POST Itinerary Parameters| B[FastAPI Backend]
-    B -->|State Initialization| C[LangGraph Orchestrator]
-    
-    subgraph LangGraph Multi-Agent Workflow
+    A[Next.js Frontend] -->|Submit Travel Preferences| B[FastAPI Backend]
+
+    B -->|Initialize Workflow State| C[LangGraph Orchestrator]
+
+    subgraph Multi-Agent Processing Layer
         C --> D[Weather Agent]
-        D -->|Fetch Weather API| E[Flight Agent]
-        E -->|Fetch SerpApi Flights| F[Hotel Agent]
-        F -->|Fetch SerpApi Hotels| G[Itinerary Agent]
-        G -->|Synthesize & Generate JSON| H[Final State]
+        D -->|Weather Forecast Data| E[Flight Agent]
+        E -->|Flight Search Results| F[Hotel Agent]
+        F -->|Accommodation Recommendations| G[Itinerary Agent]
+        G -->|Generate Structured Plan| H[Final Travel State]
     end
 
-    H -->|Return Itinerary JSON| B
-    B -->|Save & Link to User| I[Convex Database]
-    B -->|Respond| A
+    H -->|Itinerary Response| B
+    B -->|Persist User Data| I[Convex Database]
+    B -->|Return Results| A
+```
+
+### Workflow Overview
+
+1. The user submits travel preferences through the **Next.js frontend**.
+2. The **FastAPI backend** initializes a workflow state and triggers the LangGraph orchestration engine.
+3. The **Weather Agent** gathers destination-specific weather forecasts and seasonal insights.
+4. The **Flight Agent** retrieves flight options, routes, and fare information from external travel APIs.
+5. The **Hotel Agent** collects accommodation recommendations based on destination, dates, and budget constraints.
+6. The **Itinerary Agent** combines all gathered information and generates a structured day-by-day travel plan.
+7. The finalized itinerary is stored in the **Convex database** and linked to the authenticated user account.
+8. The complete travel plan is returned to the frontend for visualization, editing, and export.
+
+```
+```
+
 ```
 
 ### **Agent Explanations**
