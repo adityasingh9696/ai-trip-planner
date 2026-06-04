@@ -156,7 +156,7 @@ def flight_agent(state: TripState):
             return {
         "flight_info": f"Unable to resolve destination airport for {dest}.",
         "flights_list": []
-                    }
+    }
             
         flight_date = state.get("check_in")
         if not flight_date:
@@ -211,7 +211,7 @@ def get_coordinates_osm(city_name: str) -> tuple:
             "limit": 1
         }
         headers = {"User-Agent": "AntigravityTripPlanner/1.0 (contact: support@tripplanner.app)"}
-        response = requests.get(url, params=params, headers=headers, timeout=5)
+        response = requests.get(url, params=params, headers=headers, timeout=10)
         if response.status_code == 200:
             data = response.json()
             if data:
