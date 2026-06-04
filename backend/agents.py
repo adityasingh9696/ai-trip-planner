@@ -147,11 +147,16 @@ def flight_agent(state: TripState):
         origin_code = resolve_iata(origin)
         dest_code = resolve_iata(dest)
         
-        if origin_code == "N/A" or dest_code == "N/A":
+        if origin_code == "N/A":
+             return {
+        "flight_info": f"Unable to resolve departure airport for {origin}.",
+        "flights_list": []
+             }
+        if dest_code == "N/A":
             return {
-                "flight_info": f"No direct commercial flights exist between {origin} and {dest}.",
-                "flights_list": []
-            }
+        "flight_info": f"Unable to resolve destination airport for {dest}.",
+        "flights_list": []
+                    }
             
         flight_date = state.get("check_in")
         if not flight_date:
