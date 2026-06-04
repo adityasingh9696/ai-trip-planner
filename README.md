@@ -19,7 +19,7 @@ Built on a stateful LangGraph workflow that coordinates independent weather, fli
 
 ### Real-Time Travel Intelligence
 
-Fetches live weather updates and travel information through integrations with **OpenWeatherMap** and **SerpApi**, providing current flight fares, hotel availability, and destination conditions.
+Integrates external travel and weather providers to retrieve current destination conditions, flight availability, and hotel information. This ensures recommendations are generated using live data rather than static datasets.
 
 ### Smart Flight Search
 
