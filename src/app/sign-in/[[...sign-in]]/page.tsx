@@ -10,7 +10,8 @@ const containerStyle = {
 
 export default function Page() {
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle}
+     aria-label="User sign in page">
       <SignIn
         path="/sign-in"
         routing="path"
