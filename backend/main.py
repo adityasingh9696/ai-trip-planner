@@ -28,7 +28,10 @@ from typing import Optional, List
 class TravelerDetail(BaseModel):
     age: int
     gender: str
-
+    
+# Request schema used by the itinerary generation endpoint.
+# Captures destination preferences, travel dates, budget,
+# companion information, and optional traveler demographics.
 class TripRequest(BaseModel):
     destination: str
     source: Optional[str] = "Lucknow"
