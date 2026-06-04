@@ -188,7 +188,9 @@ The API server will run at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ---
 
-## 🌐 Deployment & Hosting
+### Deployment Strategy
 
-* **Frontend Application**: Hosted on **Vercel Cloud**, leveraging edge serverless execution for high-speed page delivery and API proxy routing.
-* **Database & BaaS**: Powered by **Convex Cloud** for live reactive database synchronization and **Clerk** for user authentication management.
+- Frontend services are deployed on Vercel for fast global content delivery.
+- Convex provides real-time database synchronization and backend persistence.
+- Clerk manages user authentication and access control.
+- FastAPI services can be deployed independently to support scalable AI workflow execution.
