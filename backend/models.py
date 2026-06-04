@@ -7,7 +7,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
+    email = Column(String(255), unique=True, index=True)
     # password hash would go here in a real app, but Clerk handles auth for now
 
 class Trip(Base):
