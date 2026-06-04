@@ -117,12 +117,19 @@ graph TD
 
 ```
 
-### **Agent Explanations**
-1. **Weather Agent**: Calls OpenWeatherMap API to get the current temperature and conditions at the destination.
-2. **Flight Agent**: Identifies destination airport codes (resolving cities to their nearest active commercial airports) and pulls live flight schedules and prices (one-way or round-trip).
-3. **Hotel Agent**: Queries live lodging prices matching the check-in/check-out calendar dates.
-4. **Itinerary Orchestrator**: Aggregates all agent outputs, matches them against user budget constraints and companion preferences, and compiles them into a geographically precise day-by-day schedule.
+### Agent Responsibilities
 
+#### Weather Agent
+Retrieves weather forecasts and environmental conditions relevant to the selected destination.
+
+#### Flight Agent
+Discovers suitable flight routes, airport mappings, and pricing information for the requested travel dates.
+
+#### Hotel Agent
+Collects accommodation recommendations and pricing data that align with the user's budget and trip duration.
+
+#### Itinerary Agent
+Aggregates outputs from all previous agents and generates a structured day-by-day travel schedule.
 ---
 
 ## ⚙️ Environment Setup
