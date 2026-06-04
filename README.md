@@ -13,7 +13,9 @@ An advanced, full-stack travel planning application powered by a custom multi-ag
 
 ### AI-Powered Multi-Agent Planning
 
-Leverages a stateful **LangGraph** workflow that coordinates multiple specialized agents for weather forecasting, flight discovery, hotel recommendations, and itinerary generation. The final travel plan is synthesized using **Gemini 2.5 Flash**.
+### AI-Powered Multi-Agent Planning
+
+Built on a stateful LangGraph workflow that coordinates independent weather, flight, hotel, and itinerary agents. Each agent specializes in a distinct task and contributes structured outputs that are combined into a unified travel plan using Gemini 2.5 Flash.
 
 ### Real-Time Travel Intelligence
 
