@@ -5,6 +5,7 @@ const containerStyle = {
   justifyContent: "center",
   alignItems: "center",
   minHeight: "100vh",
+  padding: "1rem",
   backgroundColor: "var(--color-background)",
 };
 
