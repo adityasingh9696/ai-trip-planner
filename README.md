@@ -23,7 +23,7 @@ Integrates external travel and weather providers to retrieve current destination
 
 ### Smart Flight Search
 
-Supports both **one-way** and **round-trip** journeys. The system automatically maps nearby cities and suburbs such as Navi Mumbai, Noida, and Gurgaon to the closest operational airport hubs, ensuring accurate route selection.
+Supports one-way and round-trip travel planning while automatically resolving nearby cities and suburban regions to the nearest active commercial airport. This improves flight coverage and reduces user input complexity.
 
 ### Adaptive Traveler Profiles
 
