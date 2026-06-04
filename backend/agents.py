@@ -109,7 +109,14 @@ def weather_agent(state: TripState):
         weather = f"Could not fetch weather: {e}"
     return {"weather_info": weather}
 
+# Cache resolved airport codes to avoid repeated lookups
+IATA_CACHE = {}
+
 def resolve_iata(city_name: str) -> str:
+
+    if city_name in IATA_CACHE:
+        return IATA_CACHE[city_name]
+
     city = city_name.split(',')[0].strip()
     if not city:
         return "N/A"
@@ -118,8 +125,8 @@ def resolve_iata(city_name: str) -> str:
     city_lower = city.lower()
     for name, code in IATA_MAP.items():
         if city_lower == name or city_lower.startswith(name) or name.startswith(city_lower):
+            IATA_CACHE[city_name] = code
             return code
-            
     # Ask Gemini to resolve to IATA code
     prompt = f"""
     Find the 3-letter IATA airport code for the city: "{city}".
@@ -131,7 +138,8 @@ def resolve_iata(city_name: str) -> str:
         response = llm.invoke([SystemMessage(content="You are a strict IATA resolver."), HumanMessage(content=prompt)])
         code = response.content.strip().upper()
         if len(code) == 3 and code.isalpha():
-            return code
+             IATA_CACHE[city_name] = code
+             return code
     except Exception:
         pass
     return "N/A"
